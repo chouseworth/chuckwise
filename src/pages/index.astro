@@ -1,0 +1,116 @@
+---
+import Base from '../layouts/Base.astro';
+import Feature from '../components/Feature.astro';
+import NotesRail from '../components/NotesRail.astro';
+import PostCard from '../components/PostCard.astro';
+import { site } from '../lib/site';
+import {
+  composeLatest,
+  featuredPosts,
+  formatDate,
+  hrefFor,
+  openingParagraphs,
+  pickLead,
+  plainTitle,
+  readingMinutes,
+  titleHtml,
+  getPublished,
+} from '../lib/posts';
+
+const posts = await getPublished();
+const lead = pickLead(posts);
+const featured = featuredPosts(posts, lead?.id);
+const slots = composeLatest(posts, lead?.id);
+const notes = posts.filter((post) => post.data.type === 'note');
+const paragraphs = openingParagraphs(lead?.body, 2);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: site.name,
+  url: site.url,
+  description: site.description,
+  author: { '@type': 'Person', name: site.author },
+  inLanguage: 'en',
+};
+---
+
+<Base title={site.name} description={site.description} current="home" home jsonLd={jsonLd}>
+  {lead && (
+    <section class="hero">
+      <div class="wrap">
+        <div class="hero-text">
+          <div class="kicker">
+            <span class="tag">Lead Commentary</span>
+            <span class="line"></span>
+            <span class="label">{readingMinutes(lead.body)} min read</span>
+          </div>
+          <h1><a href={hrefFor(lead)} set:html={titleHtml(lead.data.title)} /></h1>
+          {lead.data.dek && <p class="dek">{lead.data.dek}</p>}
+          <div class="byline">By <b>{site.author}</b> &nbsp;/&nbsp; <time datetime={lead.data.date.toISOString()}>{formatDate(lead.data.date)}</time></div>
+          {paragraphs.length > 0 && (
+            <div class:list={['hero-body', { single: paragraphs.length < 2 }]}>
+              {paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+            </div>
+          )}
+          <a class="read" href={hrefFor(lead)}>Read the commentary →</a>
+        </div>
+        <div class="hero-art">
+          <div class="circle" aria-hidden="true"></div>
+          <div class="bars" aria-hidden="true"></div>
+          <div class="big" aria-hidden="true">{site.issue}</div>
+          <div class="top"><span class="tag ink">Cover Story</span><span class="label">Issue {site.issue}</span></div>
+          <div class="bottom">
+            <span class="label">The Argument</span>
+            <p>{lead.data.coverLine || lead.data.dek || plainTitle(lead.data.title)}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <Feature posts={featured} />
+
+  <main class="wrap">
+    <div class="sec-head">
+      <h2>Latest<sup>Issue {site.issue}</sup></h2>
+      <a href="/archive/">All pieces →</a>
+    </div>
+    {slots.length === 0 ? (
+      <p class="empty">The issue is still being set. The first pieces will land here.</p>
+    ) : (
+      <div class="grid">
+        {slots.map((slot) => <PostCard post={slot.post} span={slot.span} variant={slot.variant} />)}
+      </div>
+    )}
+  </main>
+
+  {lead?.data.pullQuote && (
+    <section class="pull">
+      <div class="wrap">
+        <div class="mark" aria-hidden="true">“</div>
+        <blockquote><span>{lead.data.pullQuote}</span></blockquote>
+        <cite class="label">— {site.author}, lead commentary</cite>
+        <div class="side" aria-hidden="true">Pull Quote · Nº{site.issue}</div>
+      </div>
+    </section>
+  )}
+
+  <section class="wrap" aria-labelledby="notes-heading">
+    <div class="sec-head">
+      <h2 id="notes-heading">Notes &amp; Links<sup>The rail</sup></h2>
+      <a href="/notes/">The full rail →</a>
+    </div>
+    <div class="notes-wrap">
+      <div class="notes-intro">
+        <span class="tag">The Rail</span>
+        <h3>Things worth your time, with my take attached.</h3>
+        <p>Each note is something I read or found, plus a line or two on why it stayed with me.</p>
+        <div class="box">
+          <span class="label">How it works</span>
+          <p>A note with a source shows up here: the title, where it came from, and the take. The full piece lives on its own page.</p>
+        </div>
+      </div>
+      <NotesRail notes={notes} />
+    </div>
+  </section>
+</Base>

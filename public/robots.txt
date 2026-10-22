@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chouseworth.com/sitemap-index.xml

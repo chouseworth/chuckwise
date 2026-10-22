@@ -1,0 +1,41 @@
+---
+import Base from '../../layouts/Base.astro';
+import ContentsList from '../../components/ContentsList.astro';
+import { site } from '../../lib/site';
+import { getPublished, tagSlug } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPublished();
+  const tags = new Map<string, string>();
+  for (const post of posts) {
+    for (const tag of post.data.tags ?? []) {
+      const slug = tagSlug(tag);
+      if (slug && !tags.has(slug)) tags.set(slug, tag);
+    }
+  }
+  return [...tags.entries()].map(([slug, label]) => ({
+    params: { tag: slug },
+    props: { label },
+  }));
+}
+
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props as Props;
+const slug = Astro.params.tag ?? '';
+const posts = (await getPublished()).filter((post) => (post.data.tags ?? []).some((tag) => tagSlug(tag) === slug));
+const description = `Pieces tagged “${label}” on ${site.name}.`;
+---
+
+<Base title={label} description={description}>
+  <main class="wrap page-wrap">
+    <div class="sec-head">
+      <h1>{label}<sup>{posts.length === 1 ? '1 piece' : `${posts.length} pieces`}</sup></h1>
+      <a href="/tags/">All tags →</a>
+    </div>
+    <p class="section-intro">Published pieces carrying this tag.</p>
+    <ContentsList posts={posts} showType />
+  </main>
+</Base>

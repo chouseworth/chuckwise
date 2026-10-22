@@ -1,0 +1,30 @@
+---
+import { typeKicker } from '../lib/site';
+import { formatShortDate, hrefFor, plainTitle, type PostEntry } from '../lib/posts';
+
+interface Props {
+  posts: PostEntry[];
+  showType?: boolean;
+}
+
+const { posts, showType = false } = Astro.props;
+---
+
+{posts.length === 0 ? (
+  <p class="empty">Nothing filed here yet.</p>
+) : (
+  <ol class="contents">
+    {posts.map((post) => (
+      <li>
+        <a href={hrefFor(post)}>
+          <span class="when">{formatShortDate(post.data.date)}</span>
+          <span>
+            {showType && <span class="label type-label">{typeKicker[post.data.type]}</span>}
+            <h2>{plainTitle(post.data.title)}</h2>
+            {post.data.dek && <p class="dekline">{post.data.dek}</p>}
+          </span>
+        </a>
+      </li>
+    ))}
+  </ol>
+)}

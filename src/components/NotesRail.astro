@@ -1,0 +1,31 @@
+---
+import { hrefFor, safeUrl, type PostEntry } from '../lib/posts';
+
+interface Props {
+  notes: PostEntry[];
+}
+
+const { notes } = Astro.props;
+---
+
+<ol class="rail">
+  {notes.length === 0 && <li class="empty-rail">No notes in this issue yet.</li>}
+  {notes.map((note) => {
+    const external = safeUrl(note.data.sourceUrl);
+    const href = external ?? hrefFor(note);
+    return (
+      <li>
+        <a class="row" href={href} {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+          <div>
+            <span class="t">{note.data.title.replace(/\*([^*]+)\*/g, '$1')}</span>
+            <span class="src">{note.data.sourceTitle || 'Note'}{external ? ' · Link' : ''}</span>
+            {note.data.dek && (
+              <span class="take"><b>My take</b>{note.data.dek}</span>
+            )}
+          </div>
+          <span class="arrow" aria-hidden="true">↗</span>
+        </a>
+      </li>
+    );
+  })}
+</ol>

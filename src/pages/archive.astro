@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import ContentsList from '../components/ContentsList.astro';
+import { site } from '../lib/site';
+import { getPublished, type PostEntry } from '../lib/posts';
+
+const posts = await getPublished();
+const byYear = new Map<number, PostEntry[]>();
+for (const post of posts) {
+  const year = post.data.date.getUTCFullYear();
+  const list = byYear.get(year) ?? [];
+  list.push(post);
+  byYear.set(year, list);
+}
+const years = [...byYear.keys()].sort((a, b) => b - a);
+const description = `Every published piece on ${site.name}, newest first.`;
+---
+
+<Base title="Archive" description={description}>
+  <main class="wrap page-wrap">
+    <div class="sec-head">
+      <h1>Archive<sup>{posts.length === 1 ? '1 piece' : `${posts.length} pieces`}</sup></h1>
+    </div>
+    <p class="section-intro">Everything that has been published, newest first. Drafts stay in the folder and off this list.</p>
+    {years.length === 0 && <p class="empty">The archive is empty.</p>}
+    {years.map((year) => (
+      <section class="year-block" aria-label={String(year)}>
+        <h2>{year}</h2>
+        <ContentsList posts={byYear.get(year) ?? []} showType />
+      </section>
+    ))}
+  </main>
+</Base>

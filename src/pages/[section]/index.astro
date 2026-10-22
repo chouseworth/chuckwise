@@ -1,0 +1,27 @@
+---
+import Base from '../../layouts/Base.astro';
+import ContentsList from '../../components/ContentsList.astro';
+import { sectionForSlug, sections, site } from '../../lib/site';
+import { getPublished } from '../../lib/posts';
+
+export function getStaticPaths() {
+  return sections.map((section) => ({
+    params: { section: section.slug },
+  }));
+}
+
+const section = sectionForSlug(Astro.params.section ?? '');
+if (!section) throw new Error('Unknown section');
+const posts = (await getPublished()).filter((post) => post.data.type === section.type);
+const description = `${section.intro} From ${site.name}.`;
+---
+
+<Base title={section.label} description={description} current={section.slug}>
+  <main class="wrap page-wrap">
+    <div class="sec-head">
+      <h1>{section.label}<sup>{posts.length === 1 ? '1 piece' : `${posts.length} pieces`}</sup></h1>
+    </div>
+    <p class="section-intro">{section.intro}</p>
+    <ContentsList posts={posts} />
+  </main>
+</Base>

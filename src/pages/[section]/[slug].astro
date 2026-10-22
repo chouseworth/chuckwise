@@ -1,0 +1,131 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ContentsList from '../../components/ContentsList.astro';
+import { sectionForType, site, typeKicker } from '../../lib/site';
+import {
+  formatDate,
+  getPublished,
+  isoDate,
+  kickerFor,
+  plainTitle,
+  readingMinutes,
+  safeUrl,
+  starString,
+  tagSlug,
+  titleHtml,
+  type PostEntry,
+} from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPublished();
+  return posts.map((post) => ({
+    params: {
+      section: sectionForType(post.data.type).slug,
+      slug: post.id,
+    },
+    props: { id: post.id },
+  }));
+}
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props as Props;
+const posts = await getPublished();
+const post = posts.find((entry) => entry.id === id);
+if (!post) throw new Error(`Missing post ${id}`);
+
+const { Content } = await render(post.entry);
+const section = sectionForType(post.data.type);
+const minutes = readingMinutes(post.body);
+const description = post.data.dek || `${plainTitle(post.data.title)} — ${site.name}`;
+const source = safeUrl(post.data.sourceUrl);
+const more = posts.filter((entry) => entry.data.type === post.data.type && entry.id !== post.id).slice(0, 3);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': post.data.type === 'review' ? 'Review' : 'Article',
+  headline: plainTitle(post.data.title),
+  description,
+  datePublished: post.data.date.toISOString(),
+  author: { '@type': 'Person', name: site.author },
+  publisher: { '@type': 'Organization', name: site.name, url: site.url },
+  mainEntityOfPage: new URL(Astro.url.pathname, Astro.site).href,
+  keywords: post.data.tags?.join(', '),
+  ...(post.data.type === 'review' && post.data.rating != null
+    ? { reviewRating: { '@type': 'Rating', ratingValue: post.data.rating, bestRating: 5 } }
+    : {}),
+};
+---
+
+<Base
+  title={plainTitle(post.data.title)}
+  description={description}
+  current={section.slug}
+  ogType="article"
+  published={post.data.date}
+  tags={post.data.tags}
+  jsonLd={jsonLd}
+>
+  <article class="wrap article-grid">
+    <aside class="article-rail">
+      <a class="label" href={`/${section.slug}/`}>{section.label}</a>
+      <time class="label" datetime={isoDate(post.data.date)}>{formatDate(post.data.date)}</time>
+      <span class="label">{minutes} min read</span>
+    </aside>
+    <div class="article-main">
+      <header>
+        <div class="kicker">
+          <a class="tag" href={`/${section.slug}/`}>{kickerFor(post)}</a>
+          <span class="line"></span>
+          <span class="label">{minutes} min read</span>
+        </div>
+        <h1 set:html={titleHtml(post.data.title)} />
+        {post.data.dek && <p class="dek">{post.data.dek}</p>}
+        <div class="byline">
+          By <b>{site.author}</b> &nbsp;/&nbsp; <time datetime={isoDate(post.data.date)}>{formatDate(post.data.date)}</time>
+        </div>
+        {post.data.type === 'conversation' && post.data.guest && (
+          <p class="byline guest-line">With <b>{post.data.guest}</b></p>
+        )}
+        {post.data.type === 'review' && post.data.rating != null && (
+          <p class="stars stars-line" aria-label={`Rated ${post.data.rating} out of 5`}>
+            <span aria-hidden="true">{starString(post.data.rating)}</span>
+          </p>
+        )}
+        {(source || post.data.sourceTitle) && (
+          <p class="source-line">
+            <span class="label">Source</span>
+            {' '}
+            {source ? (
+              <a href={source} target="_blank" rel="noopener noreferrer">{post.data.sourceTitle || source}</a>
+            ) : (
+              <span>{post.data.sourceTitle}</span>
+            )}
+          </p>
+        )}
+      </header>
+      <div class="prose">
+        <Content />
+      </div>
+      {post.data.tags && post.data.tags.length > 0 && (
+        <ul class="tag-row" aria-label="Tags">
+          {post.data.tags.map((tag) => (
+            <li><a class="tag ghost" href={`/tags/${tagSlug(tag)}/`}>{tag}</a></li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </article>
+
+  {more.length > 0 && (
+    <section class="wrap page-wrap" aria-label={`More ${section.label}`}>
+      <div class="sec-head">
+        <h2>More {section.label}</h2>
+        <a href={`/${section.slug}/`}>All {section.nav.toLowerCase()} →</a>
+      </div>
+      <ContentsList posts={more} />
+    </section>
+  )}
+</Base>

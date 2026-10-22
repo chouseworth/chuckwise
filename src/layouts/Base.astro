@@ -1,0 +1,139 @@
+---
+import '@fontsource/anton/latin-400.css';
+import '@fontsource/inter/latin-400.css';
+import '@fontsource/inter/latin-500.css';
+import '@fontsource/inter/latin-600.css';
+import '@fontsource/inter/latin-700.css';
+import '@fontsource/inter/latin-800.css';
+import '@fontsource/playfair-display/latin-700.css';
+import '@fontsource/playfair-display/latin-700-italic.css';
+import '@fontsource/playfair-display/latin-900.css';
+import '@fontsource/playfair-display/latin-900-italic.css';
+import '../styles/global.css';
+import { sections, site } from '../lib/site';
+
+interface Props {
+  title: string;
+  description: string;
+  current?: string;
+  home?: boolean;
+  ogType?: 'website' | 'article';
+  published?: Date;
+  tags?: string[];
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const { title, description, current = '', home = false, ogType = 'website', published, tags = [], jsonLd } = Astro.props;
+const documentTitle = home ? `${site.name} — ${site.tagline}` : `${title} — ${site.name}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const image = new URL('/og.png', Astro.site);
+const year = new Date().getUTCFullYear();
+const nav = [{ href: '/', label: 'Front Page', id: 'home' }, ...sections.map((section) => ({ href: `/${section.slug}/`, label: section.nav, id: section.slug }))];
+const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{documentTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.href} />
+    <meta name="author" content={site.author} />
+    <meta name="theme-color" content="#0b0b0b" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={documentTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:image" content={image.href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${site.name} — ${site.tagline}`} />
+    <meta property="og:locale" content={site.locale} />
+    {published && <meta property="article:published_time" content={published.toISOString()} />}
+    {ogType === 'article' && <meta property="article:author" content={site.author} />}
+    {tags.map((tag) => <meta property="article:tag" content={tag} />)}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={documentTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image.href} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={`${site.name} RSS`} href="/rss.xml" />
+    {ld && <script type="application/ld+json" set:html={ld} />}
+  </head>
+  <body>
+    <a class="skip" href="#content">Skip to content</a>
+    <div class="strip">
+      <div class="wrap">
+        <span class="label">Vol. {site.volume} <span class="dot">●</span> Issue {site.issue} <span class="dot">●</span> {site.season}</span>
+        <span class="label hide-sm">Essays · Takes · Reviews · Notes · Conversations</span>
+        <span class="label hide-sm">chouseworth.com</span>
+      </div>
+    </div>
+
+    <header class="masthead">
+      <div class="wrap">
+        <a class="title" href="/"><span class="the">Chuck</span>Wise</a>
+        <div class="issue">
+          <div class="num">Nº{site.issue}</div>
+          <span class="label">{site.tagline}</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="main" aria-label="Sections">
+      <div class="wrap">
+        <ul>
+          {nav.map((item) => (
+            <li>
+              <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>{item.label}</a>
+            </li>
+          ))}
+        </ul>
+        <a class="subscribe" href="/about/#subscribe">Subscribe</a>
+      </div>
+    </nav>
+
+    <div id="content">
+      <slot />
+    </div>
+
+    <footer>
+      <div class="wrap">
+        <div class="f-top">
+          <div>
+            <div class="f-title"><span>Chuck</span>Wise</div>
+            <p>A personal magazine of essays, takes, reviews, notes, and conversations — commentary, mostly mine.</p>
+            <div class="signup">
+              <a class="signup-field" href="/rss.xml">chouseworth.com/rss.xml</a>
+              <a class="signup-btn" href="/rss.xml">Get the issue</a>
+            </div>
+          </div>
+          <div class="f-col">
+            <h2>Sections</h2>
+            {sections.map((section) => <a href={`/${section.slug}/`}>{section.nav}</a>)}
+          </div>
+          <div class="f-col">
+            <h2>Magazine</h2>
+            <a href="/about/">About</a>
+            <a href="/archive/">Archive</a>
+            <a href="/tags/">Tags</a>
+            <a href="/rss.xml">RSS</a>
+          </div>
+          <div class="f-col">
+            <h2>Elsewhere</h2>
+            <a href="/about/#subscribe">Subscribe</a>
+            <a href="/about/#colophon">Colophon</a>
+            <a href="/about/">The editor</a>
+          </div>
+        </div>
+        <div class="f-bot">
+          <span>© {year} <b>chouseworth.com</b></span>
+          <span>Commentary, mostly mine</span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
