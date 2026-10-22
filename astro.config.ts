@@ -5,7 +5,7 @@ import { attachments } from './src/integrations/attachments';
 import { obsidianCallouts } from './src/lib/callouts';
 
 export default defineConfig({
-  site: 'https://chouseworth.com',
+  site: 'https://www.chuckwise.com',
   output: 'static',
   trailingSlash: 'always',
   integrations: [sitemap(), attachments()],

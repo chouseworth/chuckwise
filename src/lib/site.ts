@@ -1,6 +1,6 @@
 export const site = {
   name: 'ChuckWise',
-  url: 'https://chouseworth.com',
+  url: 'https://www.chuckwise.com',
   description: 'A personal magazine of essays, short takes, and reviews. Published by Chuck Houseworth.',
   author: 'Chuck Houseworth',
   tagline: 'Published by Chuck Houseworth',

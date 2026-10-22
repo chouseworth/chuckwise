@@ -43,6 +43,7 @@ const aboutCurrent = Astro.url.pathname === '/about' || Astro.url.pathname.start
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const image = new URL('/og.png', Astro.site);
 const year = new Date().getUTCFullYear();
+const host = new URL(site.url).host;
 const nav = [{ href: '/', label: 'Front Page', id: 'home' }, ...sections.map((section) => ({ href: `/${section.slug}/`, label: section.nav, id: section.slug }))];
 const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
 ---
@@ -83,7 +84,7 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
     <div class="strip">
       <div class="wrap">
         <span class="label hide-sm">Essays · Short Takes · Reviews</span>
-        <span class="label">chouseworth.com</span>
+        <span class="label">{host}</span>
       </div>
     </div>
 
@@ -126,7 +127,7 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
             <div class="f-title"><span>Chuck</span>Wise</div>
             <p>A personal magazine of essays, short takes, and reviews. {site.tagline}.</p>
             <div class="signup">
-              <a class="signup-field" href="/rss.xml">chouseworth.com/rss.xml</a>
+              <a class="signup-field" href="/rss.xml">{host}/rss.xml</a>
               <a class="signup-btn" href="/rss.xml">Get the feed</a>
             </div>
           </div>
@@ -145,7 +146,7 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
           </div>
         </div>
         <div class="f-bot">
-          <span>© {year} <b>chouseworth.com</b></span>
+          <span>© {year} <b>{host}</b></span>
           <span>{site.tagline}</span>
         </div>
       </div>

@@ -129,4 +129,4 @@ Do this in the Cloudflare dashboard. This repository does not configure DNS and 
 3. No environment variables are required. The Cusdis app id lives in `src/lib/site.ts`.
 4. Production branch: `main`, or whichever branch you want the live site to follow.
 
-Every push to that branch rebuilds the site. `wrangler.toml` records the same output directory if you ever use Wrangler locally. Point `chouseworth.com` at the Pages project only when you are ready; that step is DNS, and it is not done from this repo.
+Every push to that branch rebuilds the site. `wrangler.toml` records the same output directory if you ever use Wrangler locally. Point `www.chuckwise.com` at the Pages project only when you are ready. If the bare `chuckwise.com` name should send people there, set that redirect in Cloudflare. Both of those steps are DNS, and they are not done from this repo.
