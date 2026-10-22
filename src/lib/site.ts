@@ -1,10 +1,9 @@
 export const site = {
   name: 'ChuckWise',
   url: 'https://chouseworth.com',
-  description:
-    'A personal magazine of essays, short takes, and reviews by Chuck Houseworth. Commentary, mostly mine.',
+  description: 'A personal magazine of essays, short takes, and reviews. Published by Chuck Houseworth.',
   author: 'Chuck Houseworth',
-  tagline: 'Commentary, mostly mine',
+  tagline: 'Published by Chuck Houseworth',
   locale: 'en_US',
   /**
    * Cusdis app id from https://cusdis.com. Leave this empty and comment

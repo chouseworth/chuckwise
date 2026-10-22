@@ -1,6 +1,4 @@
 ---
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
 import Base from '../layouts/Base.astro';
 import PostCard from '../components/PostCard.astro';
 import { site } from '../lib/site';
@@ -21,7 +19,6 @@ const lead = posts.find((post) => post.data.type === 'essay');
 const shortTakes = latestOfType(posts, 'short-take', 3);
 const reviews = latestOfType(posts, 'review', 3);
 const paragraphs = openingParagraphs(lead?.body, 1);
-const hasAuthorPhoto = existsSync(join(process.cwd(), 'public', 'images', 'chuck.jpg'));
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
@@ -34,13 +31,6 @@ const jsonLd = {
 ---
 
 <Base title={site.name} description={site.description} current="home" home jsonLd={jsonLd}>
-  <div class="wrap author-line">
-    {hasAuthorPhoto && (
-      <img class="author-photo" src="/images/chuck.jpg" alt={site.author} width="52" height="52" />
-    )}
-    <a href="/about/">About Chuck</a>
-  </div>
-
   {lead && (
     <section class="hero">
       <div class="wrap">

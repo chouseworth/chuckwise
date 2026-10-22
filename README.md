@@ -83,7 +83,7 @@ cusdisAppId: 'paste-the-app-id-here',
 
 ## Your photo
 
-Save a picture of yourself as `public/images/chuck.jpg`. The front page shows it as a small round photo next to “About Chuck,” which links to the About page. If that file is missing, the photo is left out. There is no broken image. The About Chuck link stays.
+Save a picture of yourself as `public/images/chuck.jpg`. The nav shows it as a small round photo next to “About Chuck,” which links to the About page. If that file is missing, the photo is left out. There is no broken image. The About Chuck link stays.
 
 ## Get posts from the vault into content/
 
