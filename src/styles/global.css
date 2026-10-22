@@ -679,6 +679,7 @@ footer .wrap { padding-top: 64px; padding-bottom: 30px; }
   padding-top: 42px;
   padding-bottom: 20px;
 }
+.article-main { min-width: 0; }
 .article-rail {
   position: sticky;
   top: 28px;
@@ -750,6 +751,7 @@ footer .wrap { padding-top: 64px; padding-bottom: 30px; }
   color: var(--paper);
   padding: 18px 20px;
   overflow-x: auto;
+  max-width: 100%;
   margin: 1.6em 0 1.8em;
 }
 .prose pre code { background: transparent; border: 0; color: inherit; padding: 0; font-size: 0.92em; }
@@ -837,7 +839,7 @@ footer .wrap { padding-top: 64px; padding-bottom: 30px; }
   .c1, .c2, .c3, .c4, .c5, .c6, .c7 { grid-column: span 12; }
   .c1 h3, .c1 h4 { font-size: 36px; }
   .pull .side { display: none; }
-  .article-grid { grid-template-columns: 1fr; gap: 0; }
+  .article-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .article-rail { position: static; display: flex; flex-wrap: wrap; gap: 8px 18px; padding-top: 0; }
   .contents a { grid-template-columns: 1fr; gap: 8px; }
   .contents .when { padding-top: 0; font-size: 22px; }
