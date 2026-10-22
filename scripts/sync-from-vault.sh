@@ -27,7 +27,7 @@ copied=0
 
 while IFS= read -r -d '' file; do
   # Frontmatter type, allowing spaces around the colon.
-  if grep -qE '^type:[[:space:]]*(essay|short-take|review|note|conversation)[[:space:]]*$' "$file"; then
+  if grep -qE '^type:[[:space:]]*(essay|short-take|review)[[:space:]]*$' "$file"; then
     rel="${file#"$VAULT"/}"
     mkdir -p "$DEST/$(dirname "$rel")"
     cp "$file" "$DEST/$rel"

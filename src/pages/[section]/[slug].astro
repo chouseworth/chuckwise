@@ -1,20 +1,21 @@
 ---
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import Comments from '../../components/Comments.astro';
 import ContentsList from '../../components/ContentsList.astro';
-import { sectionForType, site, typeKicker } from '../../lib/site';
+import { sectionForType, site } from '../../lib/site';
 import {
+  displayAuthor,
   formatDate,
   getPublished,
   isoDate,
+  isGuest,
   kickerFor,
   plainTitle,
   readingMinutes,
-  safeUrl,
   starString,
   tagSlug,
   titleHtml,
-  type PostEntry,
 } from '../../lib/posts';
 
 export async function getStaticPaths() {
@@ -41,17 +42,19 @@ const { Content } = await render(post.entry);
 const section = sectionForType(post.data.type);
 const minutes = readingMinutes(post.body);
 const description = post.data.dek || `${plainTitle(post.data.title)} — ${site.name}`;
-const source = safeUrl(post.data.sourceUrl);
+const author = displayAuthor(post);
+const guest = isGuest(post);
 const more = posts.filter((entry) => entry.data.type === post.data.type && entry.id !== post.id).slice(0, 3);
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': post.data.type === 'review' ? 'Review' : 'Article',
   headline: plainTitle(post.data.title),
   description,
   datePublished: post.data.date.toISOString(),
-  author: { '@type': 'Person', name: site.author },
+  author: { '@type': 'Person', name: author },
   publisher: { '@type': 'Organization', name: site.name, url: site.url },
-  mainEntityOfPage: new URL(Astro.url.pathname, Astro.site).href,
+  mainEntityOfPage: pageUrl,
   keywords: post.data.tags?.join(', '),
   ...(post.data.type === 'review' && post.data.rating != null
     ? { reviewRating: { '@type': 'Rating', ratingValue: post.data.rating, bestRating: 5 } }
@@ -65,6 +68,7 @@ const jsonLd = {
   current={section.slug}
   ogType="article"
   published={post.data.date}
+  author={author}
   tags={post.data.tags}
   jsonLd={jsonLd}
 >
@@ -84,25 +88,18 @@ const jsonLd = {
         <h1 set:html={titleHtml(post.data.title)} />
         {post.data.dek && <p class="dek">{post.data.dek}</p>}
         <div class="byline">
-          By <b>{site.author}</b> &nbsp;/&nbsp; <time datetime={isoDate(post.data.date)}>{formatDate(post.data.date)}</time>
+          By <b>{author}</b> &nbsp;/&nbsp; <time datetime={isoDate(post.data.date)}>{formatDate(post.data.date)}</time>
         </div>
-        {post.data.type === 'conversation' && post.data.guest && (
-          <p class="byline guest-line">With <b>{post.data.guest}</b></p>
+        {guest && (
+          <aside class="guest-box">
+            <span class="label">Guest contributor</span>
+            <p class="guest-name">{author}</p>
+            {post.data.author_bio && <p>{post.data.author_bio}</p>}
+          </aside>
         )}
         {post.data.type === 'review' && post.data.rating != null && (
           <p class="stars stars-line" aria-label={`Rated ${post.data.rating} out of 5`}>
             <span aria-hidden="true">{starString(post.data.rating)}</span>
-          </p>
-        )}
-        {(source || post.data.sourceTitle) && (
-          <p class="source-line">
-            <span class="label">Source</span>
-            {' '}
-            {source ? (
-              <a href={source} target="_blank" rel="noopener noreferrer">{post.data.sourceTitle || source}</a>
-            ) : (
-              <span>{post.data.sourceTitle}</span>
-            )}
           </p>
         )}
       </header>
@@ -116,6 +113,7 @@ const jsonLd = {
           ))}
         </ul>
       )}
+      <Comments pageId={post.id} pageUrl={pageUrl} pageTitle={plainTitle(post.data.title)} enabled={post.data.comments} />
     </div>
   </article>
 

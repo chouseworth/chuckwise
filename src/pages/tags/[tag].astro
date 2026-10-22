@@ -25,7 +25,9 @@ interface Props {
 
 const { label } = Astro.props as Props;
 const slug = Astro.params.tag ?? '';
-const posts = (await getPublished()).filter((post) => (post.data.tags ?? []).some((tag) => tagSlug(tag) === slug));
+const posts = (await getPublished())
+  .filter((post) => (post.data.tags ?? []).some((tag) => tagSlug(tag) === slug))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 const description = `Pieces tagged “${label}” on ${site.name}.`;
 ---
 

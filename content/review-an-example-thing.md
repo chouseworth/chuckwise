@@ -6,8 +6,6 @@ dek: "A placeholder verdict on a made-up object. Nothing here refers to a real b
 tags:
   - sample
   - sample-object
-featured: true
-lead: false
 draft: false
 rating: 4
 ---

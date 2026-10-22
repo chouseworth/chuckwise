@@ -1,27 +1,23 @@
 ---
-title: "An Example Feature Title That Rotates Every Week"
+title: "Another Sample Essay, Filed Earlier"
 type: essay
 date: 2026-10-18
-dek: "Placeholder summary for the rotating featured piece. In the real site this slot cycles through a hand-picked essay, review, or conversation."
+dek: "An older sample essay. The front page uses the newest essay, so this one stays in the essays list."
 tags:
   - sample
-  - feature
-featured: true
-lead: false
 draft: false
+comments: false
 ---
 
-This essay is a sample, filed so the black band on the front page has something to rotate. The summary above is not a report. It describes the slot, not the world.
-
-The homepage keeps a short list of pieces marked featured. One of them is the piece for the week. The bars next to “In Rotation” open the others. Nothing here is tracking which bar you press.
+This essay is a sample, and it is older than the one at the top of the front page. The site does not use a lead flag. Newest essay wins.
 
 ## A made-up tension
 
 Suppose two ideas are pulling in opposite directions. A real essay would name them and take a side. This one only marks the space: idea A on the left, idea B on the right, and a sentence in the middle that refuses to pretend it has settled anything.
 
-> [!tip] How the slot is chosen
-> Any post with featured set to true can land here, except the lead commentary, which already has the top of the page. The choice changes with the week.
+> [!tip] Comments on this sample
+> This file sets comments to false. When a Cusdis app id is configured, this essay stays quiet and the others can take replies.
 
 If you want the long version of the sample argument, read [[A Placeholder Headline That Argues Something Boldly#The shape of an argument|the sample argument]]. That link only works because the other file is published. A draft would have stayed as plain text.
 
-The rest of this piece is ballast, in the honest sense. It exists so the article page has paragraphs, a heading, and a callout to style. Delete it when a real feature is ready. Do not cite it.
+The rest of this piece is ballast, in the honest sense. It exists so the article page has paragraphs, a heading, and a callout to style. Delete it when a real essay is ready. Do not cite it.

@@ -7,15 +7,11 @@ export interface PostData {
   date: Date;
   dek?: string;
   tags?: string[];
-  featured?: boolean;
-  lead?: boolean;
   draft?: boolean;
-  sourceUrl?: string;
-  sourceTitle?: string;
+  comments: boolean;
+  author?: string;
+  author_bio?: string;
   rating?: number;
-  pullQuote?: string;
-  coverLine?: string;
-  guest?: string;
 }
 
 export interface PostEntry {
@@ -24,8 +20,6 @@ export interface PostEntry {
   data: PostData;
   entry: CollectionEntry<'posts'>;
 }
-
-export type CardVariant = 'essay' | 'quote' | 'review' | 'conversation' | 'note' | 'plain';
 
 export function escapeHtml(value: string): string {
   return value
@@ -159,109 +153,31 @@ function normalize(entry: CollectionEntry<'posts'>): PostEntry | null {
       date,
       dek: clean(data.dek),
       tags: Array.isArray(data.tags) ? data.tags : undefined,
-      featured: data.featured === true,
-      lead: data.lead === true,
       draft: false,
-      sourceUrl: clean(data.sourceUrl),
-      sourceTitle: clean(data.sourceTitle),
+      comments: data.comments !== false,
+      author: clean(data.author),
+      author_bio: clean(data.author_bio),
       rating: typeof data.rating === 'number' ? data.rating : undefined,
-      pullQuote: clean(data.pullQuote),
-      coverLine: clean(data.coverLine),
-      guest: clean(data.guest),
     },
   };
+}
+
+export function displayAuthor(post: PostEntry): string {
+  return post.data.author?.trim() || site.author;
+}
+
+export function isGuest(post: PostEntry): boolean {
+  return displayAuthor(post).toLowerCase() !== site.author.toLowerCase();
+}
+
+export function latestOfType(posts: PostEntry[], type: PostType, limit: number): PostEntry[] {
+  return posts.filter((post) => post.data.type === type).slice(0, limit);
 }
 
 function clean(value: string | null | undefined): string | undefined {
   if (typeof value !== 'string') return undefined;
   const trimmed = value.trim();
   return trimmed || undefined;
-}
-
-export function pickLead(posts: PostEntry[]): PostEntry | undefined {
-  return (
-    posts.find((post) => post.data.lead) ??
-    posts.find((post) => post.data.type === 'essay') ??
-    posts[0]
-  );
-}
-
-export function featuredPosts(posts: PostEntry[], leadId?: string): PostEntry[] {
-  const flagged = posts.filter((post) => post.data.featured && post.id !== leadId);
-  if (flagged.length > 0) return flagged;
-  return posts.filter((post) => post.id !== leadId).slice(0, 4);
-}
-
-/** Which featured post is "this week", stable for seven days. */
-export function rotationIndex(count: number, now = new Date()): number {
-  if (count <= 1) return 0;
-  const [year, month, day] = site.rotationEpoch.split('-').map(Number);
-  const epoch = Date.UTC(year, month - 1, day);
-  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-  const weeks = Math.floor((today - epoch) / 604_800_000);
-  return ((weeks % count) + count) % count;
-}
-
-export interface GridSlot {
-  post: PostEntry;
-  span: string;
-  variant: CardVariant;
-}
-
-const GRID_PLAN: Array<{ span: string; variant: CardVariant; type?: PostType }> = [
-  { span: 'c1', variant: 'essay', type: 'essay' },
-  { span: 'c2', variant: 'quote', type: 'short-take' },
-  { span: 'c3', variant: 'review', type: 'review' },
-  { span: 'c4', variant: 'conversation', type: 'conversation' },
-  { span: 'c5', variant: 'note', type: 'note' },
-  { span: 'c6', variant: 'plain', type: 'short-take' },
-  { span: 'c7', variant: 'essay', type: 'essay' },
-];
-
-export function composeLatest(posts: PostEntry[], leadId?: string): GridSlot[] {
-  const pool = posts.filter((post) => post.id !== leadId);
-  const used = new Set<string>();
-  const take = (type?: PostType) => {
-    const found = pool.find((post) => !used.has(post.id) && (!type || post.data.type === type));
-    if (!found) return undefined;
-    used.add(found.id);
-    return found;
-  };
-
-  const slots: GridSlot[] = [];
-  for (const plan of GRID_PLAN) {
-    const preferred = take(plan.type);
-    const post = preferred ?? take();
-    if (!post) break;
-    const variant = preferred ? plan.variant : variantFor(post);
-    slots.push({ post, span: plan.span, variant });
-  }
-
-  const extras = ['c3', 'c4', 'c5'];
-  for (const post of pool) {
-    if (used.has(post.id)) continue;
-    slots.push({
-      post,
-      span: extras[slots.length % extras.length],
-      variant: variantFor(post),
-    });
-  }
-  return slots;
-}
-
-function variantFor(post: PostEntry): CardVariant {
-  switch (post.data.type) {
-    case 'short-take':
-      return 'quote';
-    case 'review':
-      return 'review';
-    case 'conversation':
-      return 'conversation';
-    case 'note':
-      return 'note';
-    default:
-      return 'essay';
-  }
 }
 
 export function sectionLabel(type: PostType): string {

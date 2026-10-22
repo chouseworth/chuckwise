@@ -1,8 +1,10 @@
 # ChuckWise
 
-ChuckWise is Chuck Houseworth’s personal magazine. It publishes commentary — essays, short takes, reviews, notes and links, and conversations — as a static site. There is no account system, no analytics, and no newsletter service.
+ChuckWise is Chuck Houseworth’s personal magazine. It publishes commentary — essays, short takes, and reviews — as a static site, one piece at a time. There is no account system, no analytics, and no newsletter service.
 
 Posts are Markdown files in the `content/` folder. The sample pieces already there are placeholders. Delete them when real writing replaces them. `content/not-a-post.md` and `content/a-draft-that-must-not-publish.md` are examples of files the site will not publish.
+
+The front page fills itself. The newest essay is the lead. Under it are the three newest short takes, then the three newest reviews. Each block links to its section.
 
 ## Write a post
 
@@ -18,25 +20,37 @@ date: 2026-10-22
 dek: "One or two sentences under the headline."
 tags:
   - sample
-featured: false
-lead: false
 draft: true
 ---
 ```
 
-`type` is one of: `essay`, `short-take`, `review`, `note`, `conversation`.
+`type` is one of: `essay`, `short-take`, `review`.
 
 Optional fields:
 
 - `dek` — the sentence under the headline
-- `tags` — a list, or a single comma-separated line
-- `featured: true` — eligible for the rotating slot on the front page
-- `lead: true` — the cover story. If several notes say this, the newest one is used
-- `pullQuote` — the big red quotation on the front page, used from the lead story
-- `coverLine` — the short line on the cover art
+- `tags` — a list, or a single comma-separated line. Each tag links to a page of every post with that tag, newest first. All tags are listed at `/tags/`.
+- `comments` — on by default. Set `false` to hide the comment thread on that post.
+- `author` — who wrote it. Leave it off and the byline is Chuck Houseworth.
+- `author_bio` — a sentence or two, shown for a guest
 - `rating` — a review score from 0 to 5
-- `guest` — who a conversation is with
-- `sourceUrl` and `sourceTitle` — for a note, the link and the name of the source
+
+### A guest piece
+
+Set `author` to the guest’s name. If it is not Chuck Houseworth, the byline uses that name and a Guest contributor box appears under it. Put a short bio in `author_bio`.
+
+```yaml
+---
+title: "Their title"
+type: short-take
+date: 2026-10-22
+author: "Their Name"
+author_bio: "One or two sentences about the guest."
+draft: false
+---
+```
+
+`content/a-sample-take-from-a-guest.md` is a sample of this. Sample Guest is not a real person.
 
 Extra fields Obsidian adds (aliases, css classes, and anything else) are ignored. A note with no `title`, `type`, and `date` is ignored too. A bad date is skipped with a warning. The build keeps going.
 
@@ -51,7 +65,25 @@ A few Obsidian habits work in the body:
 > The body of the callout.
 ```
 
-Mark one story `lead: true` for the top of the front page. Mark a few `featured: true` for the black “In Rotation” band. The band shows one of them for the week and lets a reader open the others.
+## Comments
+
+Comments use [Cusdis](https://cusdis.com). The site works without it. Until an app id is set, articles simply do not show a comment box.
+
+1. Create a free account at https://cusdis.com.
+2. Add a website. The dashboard shows an App ID (a long string of letters and numbers).
+3. Open `src/lib/site.ts` and paste that id between the quotes:
+
+```ts
+cusdisAppId: 'paste-the-app-id-here',
+```
+
+4. Save, commit, and push. The next build adds a comment thread to the bottom of each article.
+
+`cusdisHost` in the same file stays `https://cusdis.com` unless you run your own Cusdis server. To keep comments off a single post, set `comments: false` in that post. The app id is public. It is meant to be in the page.
+
+## Your photo
+
+Save a picture of yourself as `public/images/chuck.jpg`. The front page shows it as a small round photo next to “About Chuck,” which links to the About page. If that file is missing, the photo is left out. There is no broken image. The About Chuck link stays.
 
 ## Get posts from the vault into content/
 
@@ -67,7 +99,7 @@ Tradeoff: this is the fewest steps, and you are writing directly in the folder t
 ./scripts/sync-from-vault.sh /path/to/your/vault
 ```
 
-The script copies only Markdown files that already have a magazine `type`, plus images those files embed. Then you commit and push.
+The script copies only Markdown files that already have a magazine `type` (`essay`, `short-take`, or `review`), plus images those files embed. Then you commit and push.
 
 Tradeoff: private notes without that frontmatter stay in the vault, which is safer. The copy is one-way. It will not delete a post you removed from the vault; delete that file in `content/` yourself. Nothing is published until you commit and push.
 
@@ -94,9 +126,7 @@ Do this in the Cloudflare dashboard. This repository does not configure DNS and 
    - **Build output directory:** `dist`
    - **Root directory:** the repository root
    - **Node.js version:** 22
-3. No environment variables are required.
+3. No environment variables are required. The Cusdis app id lives in `src/lib/site.ts`.
 4. Production branch: `main`, or whichever branch you want the live site to follow.
 
 Every push to that branch rebuilds the site. `wrangler.toml` records the same output directory if you ever use Wrangler locally. Point `chouseworth.com` at the Pages project only when you are ready; that step is DNS, and it is not done from this repo.
-
-The rotating featured piece is chosen by the week. The page also updates that choice in the browser, so it does not depend on a rebuild every Monday.

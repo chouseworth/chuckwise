@@ -1,56 +1,30 @@
 ---
-import { site } from '../lib/site';
-import {
-  hrefFor,
-  kickerFor,
-  plainTitle,
-  readingMinutes,
-  starString,
-  type CardVariant,
-  type PostEntry,
-} from '../lib/posts';
+import { displayAuthor, formatShortDate, hrefFor, isoDate, isGuest, kickerFor, plainTitle, starString, type PostEntry } from '../lib/posts';
 
 interface Props {
   post: PostEntry;
-  span?: string;
-  variant: CardVariant;
 }
 
-const { post, span, variant } = Astro.props;
-const quote = post.data.pullQuote || plainTitle(post.data.title);
-const art =
-  variant === 'review' ? 'art-3' :
-  variant === 'note' ? 'art-2' :
-  variant === 'essay' ? (span === 'c7' ? 'art-4' : 'art-1') :
-  undefined;
-const tagClass = variant === 'quote' ? 'tag ink' : variant === 'note' ? 'tag ghost' : 'tag';
-const minutes = readingMinutes(post.body);
+const { post } = Astro.props;
+const author = displayAuthor(post);
+const guest = isGuest(post);
 ---
 
-<article class:list={['card', span, variant === 'quote' && 'quote-card', variant === 'conversation' && 'ink-card']}>
+<article class="card">
   <a class="card-link" href={hrefFor(post)}>
-    {art && <div class:list={['art', art]} aria-hidden="true" />}
     <div class="card-row">
-      <span class={tagClass}>{kickerFor(post)}</span>
-      {variant === 'review' && post.data.rating != null ? (
+      <span class="card-tags">
+        <span class="tag">{kickerFor(post)}</span>
+        {guest && <span class="tag ghost">Guest</span>}
+      </span>
+      {post.data.type === 'review' && post.data.rating != null ? (
         <span class="stars" aria-label={`Rated ${post.data.rating} out of 5`}><span aria-hidden="true">{starString(post.data.rating)}</span></span>
       ) : (
-        <span class="read-time">{minutes} min</span>
+        <time class="read-time" datetime={isoDate(post.data.date)}>{formatShortDate(post.data.date)}</time>
       )}
     </div>
-    {variant === 'conversation' && <div class="num-big" aria-hidden="true">Q&amp;A</div>}
-    {variant === 'quote' ? (
-      <h3 class="q">“{quote}”</h3>
-    ) : (
-      <h3>{plainTitle(post.data.title)}</h3>
-    )}
+    <h3>{plainTitle(post.data.title)}</h3>
     {post.data.dek && <p>{post.data.dek}</p>}
-    <div class="byline">
-      {variant === 'conversation' ? (
-        <>With <b>{post.data.guest || 'the guest'}</b></>
-      ) : (
-        <>By <b>{site.author}</b></>
-      )}
-    </div>
+    <div class="byline">By <b>{author}</b></div>
   </a>
 </article>

@@ -2,18 +2,20 @@ export const site = {
   name: 'ChuckWise',
   url: 'https://chouseworth.com',
   description:
-    'A personal magazine of essays, short takes, reviews, notes, and conversations by Chuck Houseworth. Commentary, mostly mine.',
+    'A personal magazine of essays, short takes, and reviews by Chuck Houseworth. Commentary, mostly mine.',
   author: 'Chuck Houseworth',
   tagline: 'Commentary, mostly mine',
-  volume: '01',
-  issue: '01',
-  season: 'Autumn 2026',
   locale: 'en_US',
-  /** Monday the weekly featured slot counts from. */
-  rotationEpoch: '2026-01-05',
+  /**
+   * Cusdis app id from https://cusdis.com. Leave this empty and comment
+   * threads are left off the pages. The id is public; it ships in the HTML.
+   */
+  cusdisAppId: '',
+  /** Cusdis host. The default service is https://cusdis.com. */
+  cusdisHost: 'https://cusdis.com',
 } as const;
 
-export const POST_TYPES = ['essay', 'short-take', 'review', 'note', 'conversation'] as const;
+export const POST_TYPES = ['essay', 'short-take', 'review'] as const;
 export type PostType = (typeof POST_TYPES)[number];
 
 export interface Section {
@@ -50,22 +52,6 @@ export const sections: readonly Section[] = [
     sup: 'Verdicts',
     intro: 'What I made of something, and whether it was worth the time.',
   },
-  {
-    type: 'note',
-    slug: 'notes',
-    label: 'Notes & Links',
-    nav: 'Notes & Links',
-    sup: 'The rail',
-    intro: 'A link worth your time, with a short take attached.',
-  },
-  {
-    type: 'conversation',
-    slug: 'conversations',
-    label: 'Conversations',
-    nav: 'Conversations',
-    sup: 'Q&A',
-    intro: 'Exchanges. Whoever is speaking is named in the piece.',
-  },
 ] as const;
 
 export function sectionForType(type: PostType): Section {
@@ -87,6 +73,4 @@ export const typeKicker: Record<PostType, string> = {
   essay: 'Essay',
   'short-take': 'Short Take',
   review: 'Review',
-  note: 'Note',
-  conversation: 'Conversation',
 };

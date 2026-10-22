@@ -48,20 +48,26 @@ export const postSchema = z.object({
     }
     return undefined;
   }, z.array(z.string()).optional()),
-  featured: optionalBool,
-  lead: optionalBool,
   draft: optionalBool,
-  sourceUrl: optionalString,
-  sourceTitle: optionalString,
+  /** Missing means comments are on. `false` hides the thread on that post. */
+  comments: z.preprocess((value) => {
+    if (value == null || value === '') return true;
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (['true', 'yes'].includes(normalized)) return true;
+      if (['false', 'no'].includes(normalized)) return false;
+    }
+    if (typeof value === 'boolean') return value;
+    return true;
+  }, z.boolean()),
+  author: optionalString,
+  author_bio: optionalString,
   rating: z.preprocess((value) => {
     if (value == null || value === '') return undefined;
     const number = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : Number.NaN;
     if (!Number.isFinite(number)) return undefined;
     return Math.min(5, Math.max(0, number));
   }, z.number().optional()),
-  pullQuote: optionalString,
-  coverLine: optionalString,
-  guest: optionalString,
 });
 
 export type PostData = z.infer<typeof postSchema>;

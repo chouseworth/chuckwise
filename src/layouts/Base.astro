@@ -19,11 +19,22 @@ interface Props {
   home?: boolean;
   ogType?: 'website' | 'article';
   published?: Date;
+  author?: string;
   tags?: string[];
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const { title, description, current = '', home = false, ogType = 'website', published, tags = [], jsonLd } = Astro.props;
+const {
+  title,
+  description,
+  current = '',
+  home = false,
+  ogType = 'website',
+  published,
+  author = site.author,
+  tags = [],
+  jsonLd,
+} = Astro.props;
 const documentTitle = home ? `${site.name} — ${site.tagline}` : `${title} — ${site.name}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const image = new URL('/og.png', Astro.site);
@@ -40,7 +51,7 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
     <title>{documentTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical.href} />
-    <meta name="author" content={site.author} />
+    <meta name="author" content={author} />
     <meta name="theme-color" content="#0b0b0b" />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={documentTitle} />
@@ -53,7 +64,7 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
     <meta property="og:image:alt" content={`${site.name} — ${site.tagline}`} />
     <meta property="og:locale" content={site.locale} />
     {published && <meta property="article:published_time" content={published.toISOString()} />}
-    {ogType === 'article' && <meta property="article:author" content={site.author} />}
+    {ogType === 'article' && <meta property="article:author" content={author} />}
     {tags.map((tag) => <meta property="article:tag" content={tag} />)}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={documentTitle} />
@@ -67,19 +78,15 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
     <a class="skip" href="#content">Skip to content</a>
     <div class="strip">
       <div class="wrap">
-        <span class="label">Vol. {site.volume} <span class="dot">●</span> Issue {site.issue} <span class="dot">●</span> {site.season}</span>
-        <span class="label hide-sm">Essays · Takes · Reviews · Notes · Conversations</span>
-        <span class="label hide-sm">chouseworth.com</span>
+        <span class="label hide-sm">Essays · Short Takes · Reviews</span>
+        <span class="label">chouseworth.com</span>
       </div>
     </div>
 
     <header class="masthead">
       <div class="wrap">
         <a class="title" href="/"><span class="the">Chuck</span>Wise</a>
-        <div class="issue">
-          <div class="num">Nº{site.issue}</div>
-          <span class="label">{site.tagline}</span>
-        </div>
+        <p class="mast-tag label">{site.tagline}</p>
       </div>
     </header>
 
@@ -105,10 +112,10 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
         <div class="f-top">
           <div>
             <div class="f-title"><span>Chuck</span>Wise</div>
-            <p>A personal magazine of essays, takes, reviews, notes, and conversations — commentary, mostly mine.</p>
+            <p>A personal magazine of essays, short takes, and reviews — commentary, mostly mine.</p>
             <div class="signup">
               <a class="signup-field" href="/rss.xml">chouseworth.com/rss.xml</a>
-              <a class="signup-btn" href="/rss.xml">Get the issue</a>
+              <a class="signup-btn" href="/rss.xml">Get the feed</a>
             </div>
           </div>
           <div class="f-col">
@@ -121,12 +128,8 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
             <a href="/archive/">Archive</a>
             <a href="/tags/">Tags</a>
             <a href="/rss.xml">RSS</a>
-          </div>
-          <div class="f-col">
-            <h2>Elsewhere</h2>
             <a href="/about/#subscribe">Subscribe</a>
             <a href="/about/#colophon">Colophon</a>
-            <a href="/about/">The editor</a>
           </div>
         </div>
         <div class="f-bot">

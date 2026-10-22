@@ -4,19 +4,11 @@ type: essay
 date:
 dek: ""
 tags: []
-featured: false
-lead: false
 draft: true
-# For a note, you can also set:
-# sourceUrl: ""
-# sourceTitle: ""
-# For a review:
+# comments: false
+# author: ""
+# author_bio: ""
 # rating: 4
-# For a conversation:
-# guest: ""
-# Optional, any type:
-# pullQuote: ""
-# coverLine: ""
 ---
 
 Write the piece here.
@@ -29,3 +21,5 @@ A callout looks like this:
 > The body of the callout.
 
 Set draft to false when it should go on the site.
+Leave author blank to publish as Chuck Houseworth. Set author to someone else, and a short author_bio, for a guest piece.
+Comments are on unless you set comments to false. They only appear after a Cusdis app id is set.

@@ -12,7 +12,7 @@ const description = `${site.name} is ${site.author}'s personal magazine of comme
     </div>
     <div class="about-grid">
       <div class="prose">
-        <p>ChuckWise is the personal magazine of Chuck Houseworth. It lives at chouseworth.com. The work is commentary — essays, short takes, reviews, notes and links, and the occasional conversation — mostly his.</p>
+        <p>ChuckWise is the personal magazine of Chuck Houseworth. It lives at chouseworth.com. The work is commentary — essays, short takes, and reviews — mostly his. Pieces go up when they are ready.</p>
         <p>The pieces on the site right now are sample placeholders. They are here so the pages, the type, and the path from a note to a published URL can be seen before the real archive is moved over. They are not reports. They do not quote real people, and they do not cite real sources.</p>
         <p>A piece is a Markdown file, often written in Obsidian. If it is marked as a draft, it stays off the site. Publishing is a static build on Cloudflare Pages. There is no account, no analytics script, and no ad.</p>
         <h2 id="colophon">Colophon</h2>
@@ -24,15 +24,15 @@ const description = `${site.name} is ${site.author}'s personal magazine of comme
       </div>
       <aside class="about-side">
         <div class="box">
-          <span class="label">This issue</span>
-          <p>Vol. {site.volume} · Issue {site.issue} · {site.season}</p>
+          <span class="label">The editor</span>
+          <p>{site.author}</p>
           <p>{site.tagline}</p>
         </div>
         <div class="box">
           <span class="label">What a post needs</span>
           <ol>
             <li>A title</li>
-            <li>A type: essay, short take, review, note, or conversation</li>
+            <li>A type: essay, short take, or review</li>
             <li>A date</li>
           </ol>
           <p>Set draft to true and the file stays unpublished.</p>
