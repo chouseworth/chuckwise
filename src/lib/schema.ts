@@ -9,6 +9,17 @@ const emptyToUndefined = (value: unknown) => {
 
 const optionalString = z.preprocess(emptyToUndefined, z.string().optional());
 
+/** A cover path, a bare filename, or a wikilink. Odd shapes are dropped. */
+const optionalImage = z.preprocess((value) => {
+  if (value == null || value === '') return undefined;
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value)) {
+    const parts = value.flat(Infinity).filter((part) => typeof part === 'string' && part.trim());
+    if (parts.length >= 1) return parts[0];
+  }
+  return undefined;
+}, z.string().optional());
+
 const optionalBool = z.preprocess((value) => {
   if (value == null || value === '') return undefined;
   if (typeof value === 'string') {
@@ -62,6 +73,9 @@ export const postSchema = z.object({
   }, z.boolean()),
   author: optionalString,
   author_bio: optionalString,
+  /** Path, filename, or wikilink for a picture in content/attachments. */
+  image: optionalImage,
+  image_alt: optionalString,
   rating: z.preprocess((value) => {
     if (value == null || value === '') return undefined;
     const number = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : Number.NaN;

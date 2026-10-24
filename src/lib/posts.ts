@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { resolveAttachmentRef } from './obsidian';
 import { PAGE_SIZE, postPath, sectionForType, site, type PostType, typeKicker } from './site';
 
 export interface PostData {
@@ -12,6 +13,9 @@ export interface PostData {
   author?: string;
   author_bio?: string;
   rating?: number;
+  /** Public URL under /attachments/, when the file exists. */
+  image?: string;
+  image_alt?: string;
 }
 
 export interface PostEntry {
@@ -117,6 +121,8 @@ function normalize(entry: CollectionEntry<'posts'>): PostEntry | null {
       author: clean(data.author),
       author_bio: clean(data.author_bio),
       rating: typeof data.rating === 'number' ? data.rating : undefined,
+      image: resolveAttachmentRef(clean(data.image)),
+      image_alt: clean(data.image_alt),
     },
   };
 }

@@ -34,6 +34,8 @@ Optional fields:
 - `author` — who wrote it. Leave it off and the byline is Chuck Houseworth.
 - `author_bio` — a sentence or two, shown for a guest
 - `rating` — a review score from 0 to 5
+- `image` — a cover picture stored with the other attachments. Any of these work: `attachments/photo.jpg`, `photo.jpg`, or `[[photo.jpg]]`. It is shown full width under the title, on the post and in the stream. If that file is missing, the picture is left out.
+- `image_alt` — words that describe the picture. Leave it off and the alt text is the post title.
 
 ### A guest piece
 
@@ -99,7 +101,7 @@ Tradeoff: this is the fewest steps, and you are writing directly in the folder t
 ./scripts/sync-from-vault.sh /path/to/your/vault
 ```
 
-The script copies only Markdown files that already have a post `type` (`essay`, `short-take`, or `review`), plus images those files embed. Then you commit and push.
+The script copies only Markdown files that already have a post `type` (`essay`, `short-take`, or `review`), plus images those files embed or name as a cover (`image:`). Then you commit and push.
 
 Tradeoff: private notes without that frontmatter stay in the vault, which is safer. The copy is one-way. It will not delete a post you removed from the vault; delete that file in `content/` yourself. Nothing is published until you commit and push.
 

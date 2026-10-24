@@ -241,6 +241,25 @@ function publicAttachment(name: string): string | undefined {
   return `/attachments/${rel.split('/').map(encodeURIComponent).join('/')}`;
 }
 
+/**
+ * Turn a cover frontmatter value into a public attachment URL.
+ * Accepts `attachments/photo.jpg`, a bare filename, or `[[photo.jpg]]`.
+ * Missing files return undefined so the page does not show a broken image.
+ */
+export function resolveAttachmentRef(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  let name = value.trim();
+  if (!name) return undefined;
+  const wiki = name.match(/^!?\s*\[\[([\s\S]+?)\]\]\s*$/);
+  if (wiki) name = wiki[1].trim();
+  name = (name.split('|')[0] ?? '').split('#')[0]?.trim() ?? '';
+  name = name.replace(/\\/g, '/').replace(/^\/+/, '');
+  if (!name || name.includes('..') || /[\0<>]/.test(name) || /^[a-z][a-z0-9+.-]*:/i.test(name)) return undefined;
+  name = name.replace(/^(?:content\/)?attachments\//i, '');
+  if (!name) return undefined;
+  return publicAttachment(name);
+}
+
 export function prepareObsidianMarkdown(source: string): string {
   const normalized = source.replace(/\r\n/g, '\n');
   const blocks: string[] = [];

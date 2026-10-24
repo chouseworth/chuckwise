@@ -6,6 +6,8 @@ dek: "Example copy: a quick reaction, a few hundred words at most, written fast 
 tags:
   - sample
   - opinion
+image: attachments/sample-cover.svg
+image_alt: "A flat sample cover, not a photograph."
 draft: false
 ---
 

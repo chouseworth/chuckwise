@@ -8,6 +8,7 @@ import {
   isoDate,
   isGuest,
   kickerFor,
+  plainTitle,
   starString,
   tagSlug,
   titleHtml,
@@ -48,6 +49,11 @@ const Heading = solo ? 'h1' : 'h2';
     <a href={href} set:html={titleHtml(post.data.title)} />
   </Heading>
   {post.data.dek && <p class="dek">{post.data.dek}</p>}
+  {post.data.image && (
+    <figure class="cover">
+      <img src={post.data.image} alt={post.data.image_alt || plainTitle(post.data.title)} />
+    </figure>
+  )}
   <div class="prose">
     {useExcerpt ? <Fragment set:html={post.excerptHtml} /> : <Content />}
   </div>

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Copy magazine posts from an Obsidian vault into this repo's content folder.
 # Only files whose frontmatter sets a magazine type are copied.
-# Attachments are copied only when a copied post embeds them with ![[file]].
+# Attachments are copied when a copied post embeds them with ![[file]]
+# or names one as a cover in frontmatter (`image:`).
 #
 # Usage:
 #   ./scripts/sync-from-vault.sh /path/to/your/vault
@@ -37,10 +38,32 @@ while IFS= read -r -d '' file; do
 done < <(find "$VAULT" -type f -name '*.md' -not -path '*/.obsidian/*' -not -path '*/templates/*' -print0)
 
 # Embeds look like ![[image.png]] or ![[folder/image.png|alt]].
+# A cover looks like `image: attachments/photo.jpg`, `image: photo.jpg`, or `image: "[[photo.jpg]]"`.
 while IFS= read -r -d '' file; do
   while IFS= read -r embed; do
-    inner="${embed#*!\[\[}"
-    inner="${inner%\]\]}"
+    inner="$embed"
+    if [[ "$inner" == '![['* ]]; then
+      inner="${inner#*!\[\[}"
+      inner="${inner%\]\]}"
+    else
+      inner="${inner#image:}"
+      inner="${inner#"${inner%%[![:space:]]*}"}"
+      inner="${inner%"${inner##*[![:space:]]}"}"
+      inner="${inner#\"}"
+      inner="${inner%\"}"
+      inner="${inner#\'}"
+      inner="${inner%\'}"
+      if [[ "$inner" == '![['* ]]; then
+        inner="${inner#!\[\[}"
+        inner="${inner%\]\]}"
+      elif [[ "$inner" == '[['* ]]; then
+        inner="${inner#\[\[}"
+        inner="${inner%\]\]}"
+      fi
+      inner="${inner#content/attachments/}"
+      inner="${inner#/attachments/}"
+      inner="${inner#attachments/}"
+    fi
     inner="${inner%%|*}"
     inner="${inner%%#*}"
     base="$(basename "$inner")"
@@ -52,7 +75,7 @@ while IFS= read -r -d '' file; do
     else
       echo "missing attachment: $base (referenced from ${file#"$VAULT"/})" >&2
     fi
-  done < <(grep -oE '!\[\[[^]]+\]\]' "$file" || true)
+  done < <({ grep -oE '!\[\[[^]]+\]\]' "$file" || true; grep -oE '^image:[[:space:]]*.+' "$file" || true; })
 done < <(find "$DEST" -type f -name '*.md' -not -path '*/templates/*' -print0)
 
 echo

@@ -9,6 +9,8 @@ draft: true
 # author: ""
 # author_bio: ""
 # rating: 4
+# image: attachments/photo.jpg
+# image_alt: "Describe the picture."
 ---
 
 Write the piece here.

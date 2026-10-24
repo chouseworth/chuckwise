@@ -49,6 +49,10 @@ const nav = [
   { href: '/about/', label: 'About', id: 'about' },
   { href: '/rss.xml', label: 'RSS', id: 'rss' },
 ];
+/** These three stay on the phone bar. Home and the rest sit in More. */
+const phonePrimary = new Set(['essays', 'short-takes', 'reviews']);
+const moreNav = nav.filter((item) => !phonePrimary.has(item.id));
+const moreCurrent = current === 'archive' || current === 'tags' || current === 'about';
 const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
 const newer = newerHref ? new URL(newerHref, Astro.site).href : '';
 const older = olderHref ? new URL(olderHref, Astro.site).href : '';
@@ -99,17 +103,26 @@ const older = olderHref ? new URL(olderHref, Astro.site).href : '';
             ) : (
               <a class="wordmark" href="/"><span class="chuck">Chuck</span>Wise</a>
             )}
-            <p class="tagline">{site.tagline}</p>
           </div>
         </div>
         <nav aria-label="Site">
-          <ul>
+          <ul class="nav-main">
             {nav.map((item) => (
-              <li>
+              <li class:list={{ 'nav-rest': !phonePrimary.has(item.id) }}>
                 <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>{item.label}</a>
               </li>
             ))}
           </ul>
+          <details class="more">
+            <summary class:list={{ current: moreCurrent }}>More</summary>
+            <ul>
+              {moreNav.map((item) => (
+                <li>
+                  <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>{item.label}</a>
+                </li>
+              ))}
+            </ul>
+          </details>
         </nav>
       </header>
 
@@ -122,7 +135,6 @@ const older = olderHref ? new URL(olderHref, Astro.site).href : '';
         <p>{site.tagline}</p>
         <p class="foot-links">
           <a href="/rss.xml">RSS</a>
-          <a href="/about/#colophon">Colophon</a>
           <span>© {year} {host}</span>
         </p>
       </footer>
