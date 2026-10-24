@@ -2,7 +2,7 @@
 title: "Review: A Second Sample Object"
 type: review
 date: 2026-10-06
-dek: "Another made-up verdict, so the reviews row on the front page has more than one card."
+dek: "Another made-up verdict, so the stream has more than one review."
 tags:
   - sample
 rating: 3
