@@ -1,24 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
-import PostCard from '../components/PostCard.astro';
+import PostStream from '../components/PostStream.astro';
 import { site } from '../lib/site';
-import {
-  displayAuthor,
-  formatDate,
-  getPublished,
-  hrefFor,
-  isoDate,
-  latestOfType,
-  openingParagraphs,
-  readingMinutes,
-  titleHtml,
-} from '../lib/posts';
+import { getPublished, homePagePath, slicePage } from '../lib/posts';
 
 const posts = await getPublished();
-const lead = posts.find((post) => post.data.type === 'essay');
-const shortTakes = latestOfType(posts, 'short-take', 3);
-const reviews = latestOfType(posts, 'review', 3);
-const paragraphs = openingParagraphs(lead?.body, 1);
+const page = slicePage(posts, 1, homePagePath);
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
@@ -30,56 +17,6 @@ const jsonLd = {
 };
 ---
 
-<Base title={site.name} description={site.description} current="home" home jsonLd={jsonLd}>
-  {lead && (
-    <section class="hero">
-      <div class="wrap">
-        <div class="hero-text">
-          <div class="kicker">
-            <a class="tag" href="/essays/">Essay</a>
-            <span class="line"></span>
-            <span class="label">{readingMinutes(lead.body)} min read</span>
-          </div>
-          <h1><a href={hrefFor(lead)} set:html={titleHtml(lead.data.title)} /></h1>
-          {lead.data.dek && <p class="dek">{lead.data.dek}</p>}
-          <div class="byline">
-            By <b>{displayAuthor(lead)}</b> &nbsp;/&nbsp;
-            <time datetime={isoDate(lead.data.date)}>{formatDate(lead.data.date)}</time>
-          </div>
-          {paragraphs.length > 0 && (
-            <div class="hero-body single">
-              {paragraphs.map((paragraph) => <p>{paragraph}</p>)}
-            </div>
-          )}
-          <a class="read" href={hrefFor(lead)}>Read the essay →</a>
-        </div>
-      </div>
-    </section>
-  )}
-
-  <main class="wrap">
-    <div class="sec-head">
-      <h2>Short Takes</h2>
-      <a href="/short-takes/">All short takes →</a>
-    </div>
-    {shortTakes.length === 0 ? (
-      <p class="empty">No short takes yet.</p>
-    ) : (
-      <div class="home-row">
-        {shortTakes.map((post) => <PostCard post={post} />)}
-      </div>
-    )}
-
-    <div class="sec-head">
-      <h2>Reviews</h2>
-      <a href="/reviews/">All reviews →</a>
-    </div>
-    {reviews.length === 0 ? (
-      <p class="empty">No reviews yet.</p>
-    ) : (
-      <div class="home-row">
-        {reviews.map((post) => <PostCard post={post} />)}
-      </div>
-    )}
-  </main>
+<Base description={site.description} current="home" wordmarkHeading newerHref={page.newerHref} olderHref={page.olderHref} jsonLd={jsonLd}>
+  <PostStream posts={page.items} newerHref={page.newerHref} olderHref={page.olderHref} />
 </Base>

@@ -1,10 +1,10 @@
 # ChuckWise
 
-ChuckWise is Chuck Houseworth’s personal magazine. It publishes commentary — essays, short takes, and reviews — as a static site, one piece at a time. There is no account system, no analytics, and no newsletter service.
+ChuckWise is Chuck Houseworth’s site for essays, short takes, and reviews. It is a static site, one piece at a time. There is no account system, no analytics, and no newsletter service.
 
 Posts are Markdown files in the `content/` folder. The sample pieces already there are placeholders. Delete them when real writing replaces them. `content/not-a-post.md` and `content/a-draft-that-must-not-publish.md` are examples of files the site will not publish.
 
-The front page fills itself. The newest essay is the lead. Under it are the three newest short takes, then the three newest reviews. Each block links to its section.
+The front page is one list of posts, newest first. Short takes and reviews are shown in full. A long essay is shortened, with a “Read more” link. Older posts continue on the next page. Essays, Short Takes, and Reviews in the menu are that same list, filtered to one type.
 
 ## Write a post
 
@@ -37,7 +37,7 @@ Optional fields:
 
 ### A guest piece
 
-Set `author` to the guest’s name. If it is not Chuck Houseworth, the byline uses that name and a Guest contributor box appears under it. Put a short bio in `author_bio`.
+Set `author` to the guest’s name. If it is not Chuck Houseworth, the byline uses that name and the bio is shown with the piece. Put a short bio in `author_bio`.
 
 ```yaml
 ---
@@ -83,7 +83,7 @@ cusdisAppId: 'paste-the-app-id-here',
 
 ## Your photo
 
-Save a picture of yourself as `public/images/chuck.jpg`. The nav shows it as a small round photo next to “About Chuck,” which links to the About page. If that file is missing, the photo is left out. There is no broken image. The About Chuck link stays.
+Save a picture of yourself as `public/images/chuck.jpg`. It shows as a small photo beside the name in the header, and again on the About page. If that file is missing, both spots are left out. There is no broken image.
 
 ## Get posts from the vault into content/
 
@@ -99,7 +99,7 @@ Tradeoff: this is the fewest steps, and you are writing directly in the folder t
 ./scripts/sync-from-vault.sh /path/to/your/vault
 ```
 
-The script copies only Markdown files that already have a magazine `type` (`essay`, `short-take`, or `review`), plus images those files embed. Then you commit and push.
+The script copies only Markdown files that already have a post `type` (`essay`, `short-take`, or `review`), plus images those files embed. Then you commit and push.
 
 Tradeoff: private notes without that frontmatter stay in the vault, which is safer. The copy is one-way. It will not delete a post you removed from the vault; delete that file in `content/` yourself. Nothing is published until you commit and push.
 

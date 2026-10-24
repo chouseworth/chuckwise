@@ -1,8 +1,8 @@
 ---
 import Base from '../../layouts/Base.astro';
-import ContentsList from '../../components/ContentsList.astro';
+import PostStream from '../../components/PostStream.astro';
 import { sectionForSlug, sections, site } from '../../lib/site';
-import { getPublished } from '../../lib/posts';
+import { getPublished, sectionPagePath, slicePage } from '../../lib/posts';
 
 export function getStaticPaths() {
   return sections.map((section) => ({
@@ -13,15 +13,14 @@ export function getStaticPaths() {
 const section = sectionForSlug(Astro.params.section ?? '');
 if (!section) throw new Error('Unknown section');
 const posts = (await getPublished()).filter((post) => post.data.type === section.type);
+const page = slicePage(posts, 1, (n) => sectionPagePath(section.slug, n));
 const description = `${section.intro} From ${site.name}.`;
 ---
 
-<Base title={section.label} description={description} current={section.slug}>
-  <main class="wrap page-wrap">
-    <div class="sec-head">
-      <h1>{section.label}<sup>{posts.length === 1 ? '1 piece' : `${posts.length} pieces`}</sup></h1>
-    </div>
-    <p class="section-intro">{section.intro}</p>
-    <ContentsList posts={posts} />
-  </main>
+<Base title={section.label} description={description} current={section.slug} newerHref={page.newerHref} olderHref={page.olderHref}>
+  <header class="page-head">
+    <h1>{section.label}</h1>
+    <p>{section.intro}</p>
+  </header>
+  <PostStream posts={page.items} newerHref={page.newerHref} olderHref={page.olderHref} />
 </Base>

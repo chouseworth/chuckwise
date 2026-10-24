@@ -1,0 +1,27 @@
+---
+import PostView from './PostView.astro';
+import type { PostEntry } from '../lib/posts';
+
+interface Props {
+  posts: PostEntry[];
+  newerHref?: string;
+  olderHref?: string;
+}
+
+const { posts, newerHref, olderHref } = Astro.props;
+---
+
+{posts.length === 0 ? (
+  <p class="empty">Nothing published here yet.</p>
+) : (
+  <div class="stream">
+    {posts.map((post) => <PostView post={post} />)}
+  </div>
+)}
+
+{(newerHref || olderHref) && (
+  <nav class="pager" aria-label="More posts">
+    {newerHref ? <a href={newerHref}>Newer posts</a> : <span></span>}
+    {olderHref && <a class="older" href={olderHref}>Older posts</a>}
+  </nav>
+)}

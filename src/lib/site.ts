@@ -1,7 +1,7 @@
 export const site = {
   name: 'ChuckWise',
   url: 'https://www.chuckwise.com',
-  description: 'A personal magazine of essays, short takes, and reviews. Published by Chuck Houseworth.',
+  description: 'Essays, short takes, and reviews. Published by Chuck Houseworth.',
   author: 'Chuck Houseworth',
   tagline: 'Published by Chuck Houseworth',
   locale: 'en_US',
@@ -13,6 +13,9 @@ export const site = {
   /** Cusdis host. The default service is https://cusdis.com. */
   cusdisHost: 'https://cusdis.com',
 } as const;
+
+/** How many posts a stream page shows before linking to older ones. */
+export const PAGE_SIZE = 5;
 
 export const POST_TYPES = ['essay', 'short-take', 'review'] as const;
 export type PostType = (typeof POST_TYPES)[number];

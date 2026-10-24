@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { Loader, LoaderContext } from 'astro/loaders';
+import { essayExcerptMarkdown } from './excerpt';
 import { prepareObsidianMarkdown, resetContentScan, scanPosts, setContentRoot } from './obsidian';
 
 /**
@@ -75,16 +76,34 @@ async function sync(context: LoaderContext, root: string) {
       continue;
     }
 
+    const fileURL = pathToFileURL(item.absPath);
     let rendered;
     try {
-      rendered = await context.renderMarkdown(prepareObsidianMarkdown(item.body), {
-        fileURL: pathToFileURL(item.absPath),
-      });
+      rendered = await context.renderMarkdown(prepareObsidianMarkdown(item.body), { fileURL });
     } catch (error) {
       context.logger.warn(
         `Skipping ${item.filePath} — ${error instanceof Error ? error.message : 'could not render markdown'}`,
       );
       continue;
+    }
+
+    const excerpt = essayExcerptMarkdown(String(data.type ?? ''), item.body);
+    if (excerpt) {
+      try {
+        const excerptRendered = await context.renderMarkdown(prepareObsidianMarkdown(excerpt), { fileURL });
+        rendered = {
+          html: rendered.html,
+          metadata: {
+            imagePaths: rendered.metadata?.imagePaths ?? [],
+            ...rendered.metadata,
+            excerptHtml: excerptRendered.html,
+          },
+        };
+      } catch (error) {
+        context.logger.warn(
+          `Excerpt skipped for ${item.filePath} — ${error instanceof Error ? error.message : 'could not render excerpt'}`,
+        );
+      }
     }
 
     context.store.set({

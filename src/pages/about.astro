@@ -1,43 +1,27 @@
 ---
 import Base from '../layouts/Base.astro';
+import { hasAuthorPhoto } from '../lib/photo';
 import { site } from '../lib/site';
 
-const description = `${site.name} is ${site.author}'s personal magazine of commentary. No tracking, no ads.`;
+const description = `${site.name} is ${site.author}'s site of essays, short takes, and reviews. No tracking, no ads.`;
+const photo = hasAuthorPhoto();
+const host = new URL(site.url).host;
 ---
 
-<Base title="About" description={description}>
-  <main class="wrap page-wrap">
-    <div class="sec-head">
-      <h1>About<sup>The magazine</sup></h1>
-    </div>
-    <div class="about-grid">
-      <div class="prose">
-        <p>ChuckWise is the personal magazine of Chuck Houseworth. It lives at {new URL(site.url).host}. The work is commentary — essays, short takes, and reviews — mostly his. Pieces go up when they are ready.</p>
-        <p>The pieces on the site right now are sample placeholders. They are here so the pages, the type, and the path from a note to a published URL can be seen before the real archive is moved over. They are not reports. They do not quote real people, and they do not cite real sources.</p>
-        <p>A piece is a Markdown file, often written in Obsidian. If it is marked as a draft, it stays off the site. Publishing is a static build on Cloudflare Pages. There is no account, no analytics script, and no ad.</p>
-        <h2 id="colophon">Colophon</h2>
-        <p>The wordmark is Anton. Headlines and quotations are Playfair Display. Everything else is Inter. The paper is a warm off-white, the ink is near-black, and there is one red.</p>
-        <p>The site is built with Astro and served as plain HTML. Fonts are stored with the site, so reading it does not call a third-party font host.</p>
-        <h2 id="subscribe">Subscribe</h2>
-        <p>There is no newsletter and no email list. New pieces show up in the RSS feed. Add it to a reader, or open it in the browser.</p>
-        <a class="feed-url" href="/rss.xml">/rss.xml</a>
-      </div>
-      <aside class="about-side">
-        <div class="box">
-          <span class="label">The editor</span>
-          <p>{site.author}</p>
-          <p>{site.tagline}</p>
-        </div>
-        <div class="box">
-          <span class="label">What a post needs</span>
-          <ol>
-            <li>A title</li>
-            <li>A type: essay, short take, or review</li>
-            <li>A date</li>
-          </ol>
-          <p>Set draft to true and the file stays unpublished.</p>
-        </div>
-      </aside>
-    </div>
-  </main>
+<Base title="About" description={description} current="about">
+  <header class="page-head">
+    <h1>About</h1>
+  </header>
+  <div class="prose">
+    {photo && <img class="about-photo" src="/images/chuck.jpg" alt={site.author} width="96" height="96" />}
+    <p>ChuckWise is Chuck Houseworth’s site for commentary — essays, short takes, and reviews — mostly his. It lives at {host}. Pieces go up when they are ready.</p>
+    <p>The pieces on the site right now are sample placeholders. They are here so the pages, the type, and the path from a note to a published URL can be seen before the real writing is moved over. They are not reports. They do not quote real people, and they do not cite real sources.</p>
+    <p>A piece is a Markdown file, often written in Obsidian. If it is marked as a draft, it stays off the site. Publishing is a static build on Cloudflare Pages. There is no account, no analytics script, and no ad.</p>
+    <h2 id="colophon">Colophon</h2>
+    <p>The name is set in Anton, with Chuck in red and Wise in black. The rest of the site is Inter, on a white page. Fonts are stored with the site, so reading it does not call a third-party font host.</p>
+    <p>The site is built with Astro and served as plain HTML.</p>
+    <h2 id="subscribe">Subscribe</h2>
+    <p>There is no newsletter and no email list. New pieces show up in the RSS feed. Add it to a reader, or open it in the browser.</p>
+    <p><a class="feed" href="/rss.xml">{host}/rss.xml</a></p>
+  </div>
 </Base>

@@ -1,5 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { postPath, sectionForType, site, type PostType, typeKicker } from './site';
+import { PAGE_SIZE, postPath, sectionForType, site, type PostType, typeKicker } from './site';
 
 export interface PostData {
   title: string;
@@ -19,6 +19,8 @@ export interface PostEntry {
   body?: string;
   data: PostData;
   entry: CollectionEntry<'posts'>;
+  /** Rendered HTML for a shortened essay. Absent when the post is shown in full. */
+  excerptHtml?: string;
 }
 
 export function escapeHtml(value: string): string {
@@ -59,50 +61,6 @@ export function isoDate(date: Date): string {
   const month = String(date.getUTCMonth() + 1).padStart(2, '0');
   const day = String(date.getUTCDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
-}
-
-export function readingMinutes(body: string | undefined): number {
-  if (!body) return 1;
-  const words = body
-    .replace(/```[\s\S]*?```/g, ' ')
-    .replace(/[#>*_`\[\]()]/g, ' ')
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
-  return Math.max(1, Math.round(words / 230));
-}
-
-export function openingParagraphs(body: string | undefined, count = 2): string[] {
-  if (!body) return [];
-  const paragraphs: string[] = [];
-  for (const block of body.split(/\n\s*\n/)) {
-    const trimmed = block.trim();
-    if (!trimmed) continue;
-    if (/^(#{1,6}\s|>|!\s|!\[|```|\||[-*+]\s|\d+\.\s)/.test(trimmed)) continue;
-    const text = trimmed
-      .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
-      .replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2')
-      .replace(/\[\[([^\]]+)\]\]/g, '$1')
-      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
-      .replace(/[*_`]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-    if (!text) continue;
-    paragraphs.push(text);
-    if (paragraphs.length >= count) break;
-  }
-  return paragraphs;
-}
-
-export function safeUrl(value: string | undefined): string | undefined {
-  if (!value) return undefined;
-  try {
-    const url = new URL(value);
-    if (url.protocol === 'http:' || url.protocol === 'https:') return url.href;
-  } catch {
-    return undefined;
-  }
-  return undefined;
 }
 
 export function tagSlug(tag: string): string {
@@ -147,6 +105,7 @@ function normalize(entry: CollectionEntry<'posts'>): PostEntry | null {
     id: entry.id,
     body: entry.body,
     entry,
+    excerptHtml: readExcerpt(entry),
     data: {
       title: data.title,
       type: data.type,
@@ -170,8 +129,70 @@ export function isGuest(post: PostEntry): boolean {
   return displayAuthor(post).toLowerCase() !== site.author.toLowerCase();
 }
 
-export function latestOfType(posts: PostEntry[], type: PostType, limit: number): PostEntry[] {
-  return posts.filter((post) => post.data.type === type).slice(0, limit);
+export function pageCount(total: number, size = PAGE_SIZE): number {
+  return Math.max(1, Math.ceil(total / size));
+}
+
+export interface PageSlice<T> {
+  items: T[];
+  page: number;
+  pages: number;
+  newerHref?: string;
+  olderHref?: string;
+}
+
+export function slicePage<T>(
+  items: T[],
+  page: number,
+  hrefForPage: (page: number) => string,
+  size = PAGE_SIZE,
+): PageSlice<T> {
+  const pages = pageCount(items.length, size);
+  const start = (page - 1) * size;
+  return {
+    items: items.slice(start, start + size),
+    page,
+    pages,
+    newerHref: page > 1 ? hrefForPage(page - 1) : undefined,
+    olderHref: page < pages ? hrefForPage(page + 1) : undefined,
+  };
+}
+
+export function homePagePath(page: number): string {
+  return page <= 1 ? '/' : `/page/${page}/`;
+}
+
+export function sectionPagePath(slug: string, page: number): string {
+  return page <= 1 ? `/${slug}/` : `/${slug}/page/${page}/`;
+}
+
+export function tagPagePath(slug: string, page: number): string {
+  return page <= 1 ? `/tags/${slug}/` : `/tags/${slug}/page/${page}/`;
+}
+
+export function postsForTag(posts: PostEntry[], slug: string): PostEntry[] {
+  return posts.filter((post) => (post.data.tags ?? []).some((tag) => tagSlug(tag) === slug));
+}
+
+export function collectTags(posts: PostEntry[]): Map<string, { label: string; count: number }> {
+  const tags = new Map<string, { label: string; count: number }>();
+  for (const post of posts) {
+    for (const tag of post.data.tags ?? []) {
+      const slug = tagSlug(tag);
+      if (!slug) continue;
+      const existing = tags.get(slug);
+      if (existing) existing.count += 1;
+      else tags.set(slug, { label: tag, count: 1 });
+    }
+  }
+  return tags;
+}
+
+function readExcerpt(entry: CollectionEntry<'posts'>): string | undefined {
+  const metadata = entry.rendered?.metadata;
+  if (!metadata) return undefined;
+  const html = metadata.excerptHtml;
+  return typeof html === 'string' && html.trim() ? html : undefined;
 }
 
 function clean(value: string | null | undefined): string | undefined {

@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+import PostStream from '../../components/PostStream.astro';
+import { site } from '../../lib/site';
+import { getPublished, homePagePath, pageCount, slicePage } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPublished();
+  const pages = pageCount(posts.length);
+  return Array.from({ length: Math.max(0, pages - 1) }, (_, index) => ({
+    params: { page: String(index + 2) },
+  }));
+}
+
+const pageNumber = Number(Astro.params.page);
+const posts = await getPublished();
+const page = slicePage(posts, pageNumber, homePagePath);
+const description = `Older posts on ${site.name}.`;
+---
+
+<Base
+  title={`Older posts, page ${page.page}`}
+  description={description}
+  current="home"
+  wordmarkHeading
+  newerHref={page.newerHref}
+  olderHref={page.olderHref}
+>
+  <PostStream posts={page.items} newerHref={page.newerHref} olderHref={page.olderHref} />
+</Base>

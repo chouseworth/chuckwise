@@ -1,28 +1,24 @@
 ---
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
 import '@fontsource/anton/latin-400.css';
 import '@fontsource/inter/latin-400.css';
 import '@fontsource/inter/latin-500.css';
 import '@fontsource/inter/latin-600.css';
-import '@fontsource/inter/latin-700.css';
-import '@fontsource/inter/latin-800.css';
-import '@fontsource/playfair-display/latin-700.css';
-import '@fontsource/playfair-display/latin-700-italic.css';
-import '@fontsource/playfair-display/latin-900.css';
-import '@fontsource/playfair-display/latin-900-italic.css';
 import '../styles/global.css';
+import { hasAuthorPhoto } from '../lib/photo';
 import { sections, site } from '../lib/site';
 
 interface Props {
-  title: string;
+  title?: string;
   description: string;
   current?: string;
-  home?: boolean;
+  /** Front page uses the wordmark as the only heading. */
+  wordmarkHeading?: boolean;
   ogType?: 'website' | 'article';
   published?: Date;
   author?: string;
   tags?: string[];
+  newerHref?: string;
+  olderHref?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
@@ -30,22 +26,32 @@ const {
   title,
   description,
   current = '',
-  home = false,
+  wordmarkHeading = false,
   ogType = 'website',
   published,
   author = site.author,
   tags = [],
+  newerHref,
+  olderHref,
   jsonLd,
 } = Astro.props;
-const documentTitle = home ? `${site.name} — ${site.tagline}` : `${title} — ${site.name}`;
-const hasAuthorPhoto = existsSync(join(process.cwd(), 'public', 'images', 'chuck.jpg'));
-const aboutCurrent = Astro.url.pathname === '/about' || Astro.url.pathname.startsWith('/about/');
+const documentTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.tagline}`;
+const photo = hasAuthorPhoto();
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const image = new URL('/og.png', Astro.site);
 const year = new Date().getUTCFullYear();
 const host = new URL(site.url).host;
-const nav = [{ href: '/', label: 'Front Page', id: 'home' }, ...sections.map((section) => ({ href: `/${section.slug}/`, label: section.nav, id: section.slug }))];
+const nav = [
+  { href: '/', label: 'Home', id: 'home' },
+  ...sections.map((section) => ({ href: `/${section.slug}/`, label: section.nav, id: section.slug })),
+  { href: '/archive/', label: 'Archive', id: 'archive' },
+  { href: '/tags/', label: 'Tags', id: 'tags' },
+  { href: '/about/', label: 'About', id: 'about' },
+  { href: '/rss.xml', label: 'RSS', id: 'rss' },
+];
 const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
+const newer = newerHref ? new URL(newerHref, Astro.site).href : '';
+const older = olderHref ? new URL(olderHref, Astro.site).href : '';
 ---
 
 <!doctype html>
@@ -57,7 +63,7 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical.href} />
     <meta name="author" content={author} />
-    <meta name="theme-color" content="#0b0b0b" />
+    <meta name="theme-color" content="#ffffff" />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={documentTitle} />
     <meta property="og:description" content={description} />
@@ -77,79 +83,49 @@ const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
     <meta name="twitter:image" content={image.href} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title={`${site.name} RSS`} href="/rss.xml" />
+    {newer && <link rel="prev" href={newer} />}
+    {older && <link rel="next" href={older} />}
     {ld && <script type="application/ld+json" set:html={ld} />}
   </head>
   <body>
     <a class="skip" href="#content">Skip to content</a>
-    <div class="strip">
-      <div class="wrap">
-        <span class="label hide-sm">Essays · Short Takes · Reviews</span>
-        <span class="label">{host}</span>
-      </div>
-    </div>
-
-    <header class="masthead">
-      <div class="wrap">
-        <a class="title" href="/"><span class="the">Chuck</span>Wise</a>
-        <p class="mast-tag label">{site.tagline}</p>
-      </div>
-    </header>
-
-    <nav class="main" aria-label="Sections">
-      <div class="wrap">
-        <ul>
-          {nav.map((item) => (
-            <li>
-              <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>{item.label}</a>
-            </li>
-          ))}
-        </ul>
-        <div class="nav-end">
-          <a class="nav-about" href="/about/" aria-current={aboutCurrent ? 'page' : undefined}>
-            {hasAuthorPhoto && (
-              <img class="author-photo" src="/images/chuck.jpg" alt="" width="28" height="28" />
-            )}
-            About Chuck
-          </a>
-          <a class="subscribe" href="/about/#subscribe">Subscribe</a>
-        </div>
-      </div>
-    </nav>
-
-    <div id="content">
-      <slot />
-    </div>
-
-    <footer>
-      <div class="wrap">
-        <div class="f-top">
+    <div class="sheet">
+      <header class="site">
+        <div class="brand">
+          {photo && <img class="portrait" src="/images/chuck.jpg" alt="" width="48" height="48" />}
           <div>
-            <div class="f-title"><span>Chuck</span>Wise</div>
-            <p>A personal magazine of essays, short takes, and reviews. {site.tagline}.</p>
-            <div class="signup">
-              <a class="signup-field" href="/rss.xml">{host}/rss.xml</a>
-              <a class="signup-btn" href="/rss.xml">Get the feed</a>
-            </div>
-          </div>
-          <div class="f-col">
-            <h2>Sections</h2>
-            {sections.map((section) => <a href={`/${section.slug}/`}>{section.nav}</a>)}
-          </div>
-          <div class="f-col">
-            <h2>Magazine</h2>
-            <a href="/about/">About</a>
-            <a href="/archive/">Archive</a>
-            <a href="/tags/">Tags</a>
-            <a href="/rss.xml">RSS</a>
-            <a href="/about/#subscribe">Subscribe</a>
-            <a href="/about/#colophon">Colophon</a>
+            {wordmarkHeading ? (
+              <h1 class="wordmark"><a href="/"><span class="chuck">Chuck</span>Wise</a></h1>
+            ) : (
+              <a class="wordmark" href="/"><span class="chuck">Chuck</span>Wise</a>
+            )}
+            <p class="tagline">{site.tagline}</p>
           </div>
         </div>
-        <div class="f-bot">
-          <span>© {year} <b>{host}</b></span>
-          <span>{site.tagline}</span>
-        </div>
-      </div>
-    </footer>
+        <nav aria-label="Site">
+          <ul>
+            {nav.map((item) => (
+              <li>
+                <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>{item.label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </header>
+
+      <main id="content">
+        <slot />
+      </main>
+
+      <footer>
+        <p class="foot-name"><span class="chuck">Chuck</span>Wise</p>
+        <p>{site.tagline}</p>
+        <p class="foot-links">
+          <a href="/rss.xml">RSS</a>
+          <a href="/about/#colophon">Colophon</a>
+          <span>© {year} {host}</span>
+        </p>
+      </footer>
+    </div>
   </body>
 </html>

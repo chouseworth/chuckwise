@@ -1,37 +1,30 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { site } from '../../lib/site';
-import { getPublished, tagSlug } from '../../lib/posts';
+import { collectTags, getPublished } from '../../lib/posts';
 
 const posts = await getPublished();
-const counts = new Map<string, { label: string; count: number }>();
-for (const post of posts) {
-  for (const tag of post.data.tags ?? []) {
-    const slug = tagSlug(tag);
-    if (!slug) continue;
-    const existing = counts.get(slug);
-    if (existing) existing.count += 1;
-    else counts.set(slug, { label: tag, count: 1 });
-  }
-}
-const tags = [...counts.entries()].sort((a, b) => a[1].label.localeCompare(b[1].label));
+const tags = [...collectTags(posts).entries()].sort((a, b) => a[1].label.localeCompare(b[1].label));
 const description = `Topics filed on ${site.name}.`;
 ---
 
-<Base title="Tags" description={description}>
-  <main class="wrap page-wrap">
-    <div class="sec-head">
-      <h1>Tags<sup>{tags.length === 1 ? '1 topic' : `${tags.length} topics`}</sup></h1>
-    </div>
-    <p class="section-intro">Every tag currently in use. A tag with no published piece does not appear.</p>
-    {tags.length === 0 ? (
-      <p class="empty">No tags yet.</p>
-    ) : (
-      <div class="tag-cloud">
-        {tags.map(([slug, tag]) => (
-          <a class="tag" href={`/tags/${slug}/`}>{tag.label} · {tag.count}</a>
-        ))}
-      </div>
-    )}
-  </main>
+<Base title="Tags" description={description} current="tags">
+  <header class="page-head">
+    <h1>Tags</h1>
+    <p>Every tag on a published piece. A tag with nothing published does not appear.</p>
+  </header>
+  {tags.length === 0 ? (
+    <p class="empty">No tags yet.</p>
+  ) : (
+    <ul class="tag-index">
+      {tags.map(([slug, tag]) => (
+        <li>
+          <a href={`/tags/${slug}/`}>
+            <span>{tag.label}</span>
+            <span class="count">{tag.count}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )}
 </Base>

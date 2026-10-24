@@ -2,14 +2,14 @@
 title: "Another Sample Essay, Filed Earlier"
 type: essay
 date: 2026-10-18
-dek: "An older sample essay. The front page uses the newest essay, so this one stays in the essays list."
+dek: "An older, shorter sample essay. It is short enough to show in full in the stream."
 tags:
   - sample
 draft: false
 comments: false
 ---
 
-This essay is a sample, and it is older than the one at the top of the front page. The site does not use a lead flag. Newest essay wins.
+This essay is a sample. It is shorter than the October 20 essay, so the stream shows the whole piece. The longer sample is cut off, with a link to keep reading.
 
 ## A made-up tension
 
