@@ -1,0 +1,61 @@
+---
+import { sectionForType, site } from '../../lib/site';
+import Base from '../../layouts/Base.astro';
+import Comments from '../../components/Comments.astro';
+import PostView from '../../components/PostView.astro';
+import { displayAuthor, getPublished, plainTitle } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPublished();
+  return posts.map((post) => ({
+    params: {
+      section: sectionForType(post.data.type).slug,
+      slug: post.id,
+    },
+    props: { id: post.id },
+  }));
+}
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props as Props;
+const posts = await getPublished();
+const post = posts.find((entry) => entry.id === id);
+if (!post) throw new Error(`Missing post ${id}`);
+
+const section = sectionForType(post.data.type);
+const description = post.data.dek || `${plainTitle(post.data.title)} — ${site.name}`;
+const author = displayAuthor(post);
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': post.data.type === 'review' ? 'Review' : 'Article',
+  headline: plainTitle(post.data.title),
+  description,
+  datePublished: post.data.date.toISOString(),
+  author: { '@type': 'Person', name: author },
+  publisher: { '@type': 'Organization', name: site.name, url: site.url },
+  mainEntityOfPage: pageUrl,
+  keywords: post.data.tags?.join(', '),
+  ...(post.data.type === 'review' && post.data.rating != null
+    ? { reviewRating: { '@type': 'Rating', ratingValue: post.data.rating, bestRating: 5 } }
+    : {}),
+};
+---
+
+<Base
+  title={plainTitle(post.data.title)}
+  description={description}
+  current={section.slug}
+  ogType="article"
+  published={post.data.date}
+  author={author}
+  tags={post.data.tags}
+  jsonLd={jsonLd}
+>
+  <PostView post={post} solo />
+  <Comments pageId={post.id} pageUrl={pageUrl} pageTitle={plainTitle(post.data.title)} enabled={post.data.comments} />
+  <p class="more-link"><a href={`/${section.slug}/`}>More {section.nav.toLowerCase()}</a></p>
+</Base>

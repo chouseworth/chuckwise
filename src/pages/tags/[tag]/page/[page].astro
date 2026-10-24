@@ -1,0 +1,43 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import PostStream from '../../../../components/PostStream.astro';
+import { site } from '../../../../lib/site';
+import { collectTags, getPublished, pageCount, postsForTag, slicePage, tagPagePath } from '../../../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPublished();
+  const paths: { params: { tag: string; page: string }; props: { label: string } }[] = [];
+  for (const [slug, tag] of collectTags(posts)) {
+    const pages = pageCount(tag.count);
+    for (let page = 2; page <= pages; page += 1) {
+      paths.push({ params: { tag: slug, page: String(page) }, props: { label: tag.label } });
+    }
+  }
+  return paths;
+}
+
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props as Props;
+const slug = Astro.params.tag ?? '';
+const pageNumber = Number(Astro.params.page);
+const posts = postsForTag(await getPublished(), slug);
+const page = slicePage(posts, pageNumber, (n) => tagPagePath(slug, n));
+const description = `Pieces tagged “${label}” on ${site.name}.`;
+---
+
+<Base
+  title={`${label}, page ${page.page}`}
+  description={description}
+  current="tags"
+  newerHref={page.newerHref}
+  olderHref={page.olderHref}
+>
+  <header class="page-head">
+    <h1>{label}</h1>
+    <p>Published pieces with this tag, newest first. <a href="/tags/">All tags</a></p>
+  </header>
+  <PostStream posts={page.items} newerHref={page.newerHref} olderHref={page.olderHref} />
+</Base>

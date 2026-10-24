@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img">
+  <rect width="1200" height="675" fill="#ececec"/>
+  <rect x="72" y="96" width="1056" height="400" fill="#f7f7f7" stroke="#1a1a1a" stroke-width="2"/>
+  <circle cx="420" cy="296" r="92" fill="#c41212"/>
+  <text x="72" y="590" fill="#1a1a1a" font-family="Georgia, 'Times New Roman', serif" font-size="42">Sample cover</text>
+</svg>

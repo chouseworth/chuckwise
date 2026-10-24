@@ -1,0 +1,81 @@
+---
+import { render } from 'astro:content';
+import { sectionForType } from '../lib/site';
+import {
+  displayAuthor,
+  formatDate,
+  hrefFor,
+  isoDate,
+  isGuest,
+  kickerFor,
+  plainTitle,
+  starString,
+  tagSlug,
+  titleHtml,
+  type PostEntry,
+} from '../lib/posts';
+
+interface Props {
+  post: PostEntry;
+  /** Permalink page: full text, and the title is the page heading. */
+  solo?: boolean;
+}
+
+const { post, solo = false } = Astro.props;
+const useExcerpt = !solo && Boolean(post.excerptHtml);
+const Content = useExcerpt ? null : (await render(post.entry)).Content;
+const section = sectionForType(post.data.type);
+const author = displayAuthor(post);
+const guest = isGuest(post);
+const href = hrefFor(post);
+const Heading = solo ? 'h1' : 'h2';
+---
+
+<article class="entry">
+  <p class="entry-meta">
+    <a href={`/${section.slug}/`}>{kickerFor(post)}</a>
+    <span aria-hidden="true"> · </span>
+    <time datetime={isoDate(post.data.date)}>{formatDate(post.data.date)}</time>
+    <span aria-hidden="true"> · </span>
+    <span class="who">{author}</span>
+    {post.data.type === 'review' && post.data.rating != null && (
+      <>
+        <span aria-hidden="true"> · </span>
+        <span class="stars" aria-label={`Rated ${post.data.rating} out of 5`}>{starString(post.data.rating)}</span>
+      </>
+    )}
+  </p>
+  <Heading>
+    <a href={href} set:html={titleHtml(post.data.title)} />
+  </Heading>
+  {post.data.dek && <p class="dek">{post.data.dek}</p>}
+  {post.data.image && (
+    <figure class="cover">
+      <img src={post.data.image} alt={post.data.image_alt || plainTitle(post.data.title)} />
+    </figure>
+  )}
+  <div class="prose">
+    {useExcerpt ? <Fragment set:html={post.excerptHtml} /> : <Content />}
+  </div>
+  {useExcerpt && (
+    <p class="continue"><a href={href}>Read more</a></p>
+  )}
+  {guest && (
+    <p class="guest">
+      <span class="guest-label">Guest</span>{' '}
+      {author}{post.data.author_bio ? ` — ${post.data.author_bio}` : ''}
+    </p>
+  )}
+  {post.data.tags && post.data.tags.length > 0 && (
+    <p class="tagged">
+      Tagged{' '}
+      {post.data.tags.map((tag, index) => (
+        <>
+          {index > 0 && ', '}
+          <a href={`/tags/${tagSlug(tag)}/`}>{tag}</a>
+        </>
+      ))}
+    </p>
+  )}
+  <p class="permalink"><a href={href}>Permalink</a></p>
+</article>

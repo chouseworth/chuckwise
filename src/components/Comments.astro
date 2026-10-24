@@ -1,0 +1,31 @@
+---
+import { site } from '../lib/site';
+
+interface Props {
+  pageId: string;
+  pageUrl: string;
+  pageTitle: string;
+  enabled?: boolean;
+}
+
+const { pageId, pageUrl, pageTitle, enabled = true } = Astro.props;
+const appId = site.cusdisAppId.trim();
+const host = site.cusdisHost.replace(/\/$/, '');
+const show = enabled && appId.length > 0;
+---
+
+{show && (
+  <section class="comments" aria-label="Comments">
+    <h2>Comments</h2>
+    <div
+      id="cusdis_thread"
+      data-host={host}
+      data-app-id={appId}
+      data-page-id={pageId}
+      data-page-url={pageUrl}
+      data-page-title={pageTitle}
+      data-theme="light"
+    ></div>
+    <script is:inline async defer src={`${host}/js/cusdis.es.js`}></script>
+  </section>
+)}

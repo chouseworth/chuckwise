@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-label="Sample geometric figure">
+  <rect width="1200" height="675" fill="#e3120b"/>
+  <circle cx="250" cy="300" r="220" fill="#f4f1ea"/>
+  <g fill="#0b0b0b">
+    <rect x="860" y="0" width="16" height="500"/>
+    <rect x="900" y="0" width="16" height="500"/>
+    <rect x="940" y="0" width="16" height="500"/>
+    <rect x="980" y="0" width="16" height="500"/>
+    <rect x="1020" y="0" width="16" height="500"/>
+    <rect x="1060" y="0" width="16" height="500"/>
+  </g>
+  <text x="70" y="620" fill="#0b0b0b" font-family="Impact, 'Arial Narrow', sans-serif" font-size="120">SAMPLE</text>
+</svg>

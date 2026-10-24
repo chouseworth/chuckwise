@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import PostStream from '../components/PostStream.astro';
+import { site } from '../lib/site';
+import { getPublished, homePagePath, slicePage } from '../lib/posts';
+
+const posts = await getPublished();
+const page = slicePage(posts, 1, homePagePath);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: site.name,
+  url: site.url,
+  description: site.description,
+  author: { '@type': 'Person', name: site.author },
+  inLanguage: 'en',
+};
+---
+
+<Base description={site.description} current="home" wordmarkHeading newerHref={page.newerHref} olderHref={page.olderHref} jsonLd={jsonLd}>
+  <PostStream posts={page.items} newerHref={page.newerHref} olderHref={page.olderHref} />
+</Base>

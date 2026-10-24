@@ -1,0 +1,7 @@
+# Cloudflare Pages serves this as a static site.
+# Build command: npm run build
+# Output directory: dist
+# This file does not deploy anything and does not touch DNS.
+name = "chuckwise"
+compatibility_date = "2026-10-22"
+pages_build_output_dir = "./dist"

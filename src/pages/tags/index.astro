@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+import { site } from '../../lib/site';
+import { collectTags, getPublished } from '../../lib/posts';
+
+const posts = await getPublished();
+const tags = [...collectTags(posts).entries()].sort((a, b) => a[1].label.localeCompare(b[1].label));
+const description = `Topics filed on ${site.name}.`;
+---
+
+<Base title="Tags" description={description} current="tags">
+  <header class="page-head">
+    <h1>Tags</h1>
+    <p>Every tag on a published piece. A tag with nothing published does not appear.</p>
+  </header>
+  {tags.length === 0 ? (
+    <p class="empty">No tags yet.</p>
+  ) : (
+    <ul class="tag-index">
+      {tags.map(([slug, tag]) => (
+        <li>
+          <a href={`/tags/${slug}/`}>
+            <span>{tag.label}</span>
+            <span class="count">{tag.count}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )}
+</Base>

@@ -1,0 +1,143 @@
+---
+import '@fontsource/anton/latin-400.css';
+import '@fontsource/inter/latin-400.css';
+import '@fontsource/inter/latin-500.css';
+import '@fontsource/inter/latin-600.css';
+import '../styles/global.css';
+import { hasAuthorPhoto } from '../lib/photo';
+import { sections, site } from '../lib/site';
+
+interface Props {
+  title?: string;
+  description: string;
+  current?: string;
+  /** Front page uses the wordmark as the only heading. */
+  wordmarkHeading?: boolean;
+  ogType?: 'website' | 'article';
+  published?: Date;
+  author?: string;
+  tags?: string[];
+  newerHref?: string;
+  olderHref?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const {
+  title,
+  description,
+  current = '',
+  wordmarkHeading = false,
+  ogType = 'website',
+  published,
+  author = site.author,
+  tags = [],
+  newerHref,
+  olderHref,
+  jsonLd,
+} = Astro.props;
+const documentTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.tagline}`;
+const photo = hasAuthorPhoto();
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const image = new URL('/og.png', Astro.site);
+const year = new Date().getUTCFullYear();
+const host = new URL(site.url).host;
+const nav = [
+  { href: '/', label: 'Home', id: 'home' },
+  ...sections.map((section) => ({ href: `/${section.slug}/`, label: section.nav, id: section.slug })),
+  { href: '/archive/', label: 'Archive', id: 'archive' },
+  { href: '/tags/', label: 'Tags', id: 'tags' },
+  { href: '/about/', label: 'About', id: 'about' },
+  { href: '/rss.xml', label: 'RSS', id: 'rss' },
+];
+/** These three stay on the phone bar. Home and the rest sit in More. */
+const phonePrimary = new Set(['essays', 'short-takes', 'reviews']);
+const moreNav = nav.filter((item) => !phonePrimary.has(item.id));
+const moreCurrent = current === 'archive' || current === 'tags' || current === 'about';
+const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
+const newer = newerHref ? new URL(newerHref, Astro.site).href : '';
+const older = olderHref ? new URL(olderHref, Astro.site).href : '';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{documentTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.href} />
+    <meta name="author" content={author} />
+    <meta name="theme-color" content="#ffffff" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={documentTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:image" content={image.href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${site.name} — ${site.tagline}`} />
+    <meta property="og:locale" content={site.locale} />
+    {published && <meta property="article:published_time" content={published.toISOString()} />}
+    {ogType === 'article' && <meta property="article:author" content={author} />}
+    {tags.map((tag) => <meta property="article:tag" content={tag} />)}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={documentTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image.href} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={`${site.name} RSS`} href="/rss.xml" />
+    {newer && <link rel="prev" href={newer} />}
+    {older && <link rel="next" href={older} />}
+    {ld && <script type="application/ld+json" set:html={ld} />}
+  </head>
+  <body>
+    <a class="skip" href="#content">Skip to content</a>
+    <div class="sheet">
+      <header class="site">
+        <div class="brand">
+          {photo && <img class="portrait" src="/images/chuck.jpg" alt="" width="48" height="48" />}
+          <div>
+            {wordmarkHeading ? (
+              <h1 class="wordmark"><a href="/"><span class="chuck">Chuck</span>Wise</a></h1>
+            ) : (
+              <a class="wordmark" href="/"><span class="chuck">Chuck</span>Wise</a>
+            )}
+          </div>
+        </div>
+        <nav aria-label="Site">
+          <ul class="nav-main">
+            {nav.map((item) => (
+              <li class:list={{ 'nav-rest': !phonePrimary.has(item.id) }}>
+                <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>{item.label}</a>
+              </li>
+            ))}
+          </ul>
+          <details class="more">
+            <summary class:list={{ current: moreCurrent }}>More</summary>
+            <ul>
+              {moreNav.map((item) => (
+                <li>
+                  <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>{item.label}</a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        </nav>
+      </header>
+
+      <main id="content">
+        <slot />
+      </main>
+
+      <footer>
+        <p class="foot-name"><span class="chuck">Chuck</span>Wise</p>
+        <p>{site.tagline}</p>
+        <p class="foot-links">
+          <a href="/rss.xml">RSS</a>
+          <span>© {year} {host}</span>
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

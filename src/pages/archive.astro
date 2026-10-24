@@ -1,0 +1,62 @@
+---
+import Base from '../layouts/Base.astro';
+import { sectionForType, site, typeKicker } from '../lib/site';
+import { formatShortDate, getPublished, hrefFor, isoDate, plainTitle, type PostEntry } from '../lib/posts';
+
+const posts = await getPublished();
+
+interface MonthGroup {
+  label: string;
+  posts: PostEntry[];
+}
+interface YearGroup {
+  year: number;
+  months: MonthGroup[];
+}
+
+const years: YearGroup[] = [];
+for (const post of posts) {
+  const year = post.data.date.getUTCFullYear();
+  let yearGroup = years.find((group) => group.year === year);
+  if (!yearGroup) {
+    yearGroup = { year, months: [] };
+    years.push(yearGroup);
+  }
+  const label = new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' }).format(post.data.date);
+  let month = yearGroup.months.find((group) => group.label === label);
+  if (!month) {
+    month = { label, posts: [] };
+    yearGroup.months.push(month);
+  }
+  month.posts.push(post);
+}
+
+const description = `Every published piece on ${site.name}, newest first.`;
+---
+
+<Base title="Archive" description={description} current="archive">
+  <header class="page-head">
+    <h1>Archive</h1>
+    <p>Everything published, newest first. Drafts stay off this list.</p>
+  </header>
+  {years.length === 0 && <p class="empty">The archive is empty.</p>}
+  {years.map((year) => (
+    <section class="archive-year" aria-label={String(year.year)}>
+      <h2>{year.year}</h2>
+      {year.months.map((month) => (
+        <div class="archive-month">
+          <h3>{month.label}</h3>
+          <ol class="archive-list">
+            {month.posts.map((post) => (
+              <li>
+                <time datetime={isoDate(post.data.date)}>{formatShortDate(post.data.date)}</time>
+                <a class="kind" href={`/${sectionForType(post.data.type).slug}/`}>{typeKicker[post.data.type]}</a>
+                <a class="title" href={hrefFor(post)}>{plainTitle(post.data.title)}</a>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))}
+    </section>
+  ))}
+</Base>
